@@ -1,0 +1,26 @@
+# Environment and secrets
+.env
+.env.*
+*.json
+!package.json
+*.key
+*.pem
+*.cert
+
+# Python
+__pycache__/
+*.pyc
+.Python
+env/
+venv/
+.venv/
+
+# Locks and PIDs (though they are in /tmp, good practice)
+*.lock
+*.pid
+*.pids
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
