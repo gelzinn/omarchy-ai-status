@@ -2,9 +2,10 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_URL=$(git -C "$SCRIPT_DIR" remote get-url origin 2>/dev/null \
-  | sed 's/^git@github\.com:/https:\/\/github.com\//' \
-  | sed 's/\.git$//')
+if [ -f "$SCRIPT_DIR/config.sh" ]; then
+    # shellcheck source=./config.sh
+    source "$SCRIPT_DIR/config.sh"
+fi
 : "${REPO_URL:=https://github.com/gelzinn/omarchy-ai-status}"
 INSTALL_DIR="$HOME/.local/share/omarchy-ai-status"
 BIN_DIR="$HOME/.local/bin"
