@@ -26,6 +26,9 @@ fi
 # Check requirements
 bash "$INSTALL_DIR/check.sh"
 
+# Generate spark animation CSS
+python3 "$INSTALL_DIR/src/setup_spark.py" 2>/dev/null || true
+
 # Create executable symlink
 mkdir -p "$BIN_DIR"
 ln -sf "$INSTALL_DIR/src/bin/waybar-ai-status" "$BIN_DIR/waybar-ai-status"

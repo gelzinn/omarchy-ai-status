@@ -202,10 +202,21 @@ def build_loading_state(latest_data, frame, selected=None):
         tooltip = f"{header}\n\n{'─' * BAR_LINE_WIDTH}\n\n  Loading AI Provider Status {spinner}\n  {bar}"
 
     provider_text = get_selected_provider_name(latest_data, selected)
+    p = _find_selected_provider(latest_data, selected)
+    if _is_claude(p):
+        provider_name = p.get("provider", "")
+        return {
+            "text": f"{provider_name} {spinner}",
+            "tooltip": tooltip.strip(),
+            "class": "claude-spark"
+        }
     return {
         "text": f"{provider_text} {spinner}" if provider_text != ICON else f"{ICON} {spinner}",
         "tooltip": tooltip.strip()
     }
+
+def _is_claude(provider_data):
+    return provider_data is not None and provider_data.get("_dir") == "claude"
 
 def build_final_state(latest_data, selected=None):
     header = format_header()
@@ -221,6 +232,21 @@ def build_final_state(latest_data, selected=None):
         tooltip = f"{header}{sep}\n" + "\n".join(blocks)
     else:
         tooltip = f"{header}\n\n{'─' * BAR_LINE_WIDTH}"
+
+    p = _find_selected_provider(latest_data, selected)
+    if _is_claude(p):
+        provider_name = p.get("provider", "")
+        metric_type = selected.get("metric", "rolling") if selected else "rolling"
+        metrics = p.get("metrics", [])
+        pct = None
+        for m in metrics:
+            if m.get("type") == metric_type:
+                pct = float(m.get("percentage", 0.0))
+                break
+        if pct is None and metrics:
+            pct = float(metrics[0].get("percentage", 0.0))
+        text = f"{provider_name} {pct:.0f}%" if pct is not None else provider_name
+        return {"text": text, "tooltip": tooltip.strip(), "class": "claude-spark"}
 
     metric_text = get_selected_metric_text(latest_data, selected)
     return {

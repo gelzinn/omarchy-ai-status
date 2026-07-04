@@ -50,6 +50,18 @@ Add the module to your Waybar config:
 
 The status text shows the usage percentage of the selected provider. Hover to see all providers in the tooltip (the active one is marked with →).
 
+## Claude Spark Animation
+
+When Claude is selected as the active provider, the microchip icon is replaced by an animated spark.
+
+To enable it, add this import at the top of your Waybar `style.css`:
+
+```css
+@import "spark.css";
+```
+
+The spark CSS is auto-generated during install. If you already have a `style.css`, just add the `@import` line after any existing imports.
+
 ## Updating
 
 Run the same command again -- it detects the existing installation and pulls the latest changes, then restarts Waybar.
