@@ -7,7 +7,7 @@
 | Provider | Auth Source | Key File |
 |---|---|---|
 | Antigravity | agy CLI session | agy login state (handled by Antigravity CLI) |
-| Claude | OpenCode auth.json | `~/.local/share/opencode/auth.json` |
+| Claude | Claude Code OAuth (fallback: OpenCode) | `~/.claude/.credentials.json`, `~/.local/share/opencode/auth.json` |
 | Codex | Codex auth token | `~/.codex/auth.json` |
 | Copilot | GitHub Copilot OAuth | `~/.config/github-copilot/host.json` |
 | Kiro | Session cookie | Browser/extension session export |
@@ -28,13 +28,13 @@ Antigravity provides usage data for both Gemini models and Claude/GPT models thr
 
 ### Claude
 
-Reads the OpenCode auth store to query Anthropic's usage endpoint.
+Reads the Claude Code OAuth credential store to query Anthropic's usage endpoint, falling back to the OpenCode auth store when Claude Code is not installed or its token has expired.
 
 | Detail | |
 |---|---|
-| **Auth** | Requires OpenCode to be authenticated with Claude |
+| **Auth** | Claude Code login (`~/.claude/.credentials.json`), or OpenCode authenticated with Claude as fallback |
 | **Endpoint** | `https://api.anthropic.com/api/oauth/usage` |
-| **Metrics** | Returns precise `remainingFraction` and `resetTime` values |
+| **Metrics** | Session (5-hour rolling) and weekly usage with reset timers, including per-model weekly limits; shows the subscription plan (Pro/Max/Team) when available |
 
 ### Codex
 
