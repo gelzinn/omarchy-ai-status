@@ -32,7 +32,7 @@ jobs:
                 echo "Ignoring unverified commit: $ID"
                 continue
               fi
-              VERSION=$(echo "$MSG" | sed 's/^chore: release v//; s/ .*//')
+              VERSION=$(echo "$MSG" | head -1 | sed 's/^chore: release v//; s/ .*//')
               echo "new=$VERSION" >> $GITHUB_OUTPUT
               echo "found=true" >> $GITHUB_OUTPUT
               exit 0
