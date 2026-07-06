@@ -40,11 +40,10 @@ jobs:
           echo "${{ steps.version.outputs.new }}" > VERSION
 
       - name: Commit, tag and push
-        env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}"
           git add VERSION
           git commit -m "chore: bump version to ${{ steps.version.outputs.new }}"
           git tag "v${{ steps.version.outputs.new }}"
