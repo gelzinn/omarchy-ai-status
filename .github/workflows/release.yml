@@ -2,24 +2,18 @@ name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Skip pushing tag and creating release"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_TOKEN }}
 
       - name: Bump version
         id: version
@@ -35,22 +29,66 @@ jobs:
           fi
           echo "new=$NEW" >> $GITHUB_OUTPUT
 
-      - name: Update VERSION file
+      - name: Create release branch
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          echo "${{ steps.version.outputs.new }}" > VERSION
+          VERSION="${{ steps.version.outputs.new }}"
+          BRANCH="release/v${VERSION}"
 
-      - name: Commit, tag and push
-        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin "https://x-access-token:${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}"
+
+          echo "$VERSION" > VERSION
           git add VERSION
-          git commit -m "chore: bump version to ${{ steps.version.outputs.new }}"
-          git tag "v${{ steps.version.outputs.new }}"
-          git push origin main --tags
+          git commit -m "chore: bump version to ${VERSION}"
+
+          git push origin "HEAD:${BRANCH}"
+
+      - name: Open release PR with auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.new }}"
+          BRANCH="release/v${VERSION}"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: release v${VERSION}" \
+            --body "Version bump to v${VERSION}." \
+            --fill
+
+          gh pr merge --squash --auto "$BRANCH"
+
+      - name: Wait for PR merge
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          BRANCH="release/v${{ steps.version.outputs.new }}"
+          for i in $(seq 1 30); do
+            STATE=$(gh pr view "$BRANCH" --json state --jq '.state')
+            if [ "$STATE" = "MERGED" ]; then
+              echo "PR merged!"
+              exit 0
+            fi
+            echo "Waiting for PR merge... ($i/30)"
+            sleep 10
+          done
+          echo "PR was not merged in time"
+          exit 1
+
+      - name: Tag the merge commit
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.new }}"
+          COMMIT_SHA=$(gh api repos/${{ github.repository }}/git/refs/heads/main --jq '.object.sha')
+          gh api repos/${{ github.repository }}/git/refs \
+            --field ref="refs/tags/v${VERSION}" \
+            --field sha="$COMMIT_SHA"
 
       - name: Create GitHub Release
-        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
@@ -64,3 +102,10 @@ jobs:
               --generate-notes \
               --latest
           fi
+
+      - name: Clean up release branch
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          BRANCH="release/v${{ steps.version.outputs.new }}"
+          gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${BRANCH}"
