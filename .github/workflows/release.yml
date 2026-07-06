@@ -44,26 +44,6 @@ jobs:
           git tag "v${{ steps.version.outputs.new }}"
           git push origin "v${{ steps.version.outputs.new }}"
 
-      - name: Create bump PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH="chore/bump-v${{ steps.version.outputs.new }}"
-          git push origin HEAD:"$BRANCH"
-          gh pr create \
-            --base main \
-            --head "$BRANCH" \
-            --title "chore: bump version to v${{ steps.version.outputs.new }}" \
-            --body "Automated version bump after release v${{ steps.version.outputs.new }}."
-
-      - name: Auto-merge bump PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH="chore/bump-v${{ steps.version.outputs.new }}"
-          PR_URL=$(gh pr list --head "$BRANCH" --json url --jq '.[0].url')
-          gh pr merge --auto --squash "$PR_URL"
-
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,3 +58,15 @@ jobs:
               --generate-notes \
               --latest
           fi
+
+      - name: Create bump PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/bump-v${{ steps.version.outputs.new }}"
+          git push origin HEAD:"$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: bump version to v${{ steps.version.outputs.new }}" \
+            --body "Automated version bump after release v${{ steps.version.outputs.new }}. Merge manually to keep VERSION in sync."
