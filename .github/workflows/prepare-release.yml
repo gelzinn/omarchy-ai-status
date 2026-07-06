@@ -29,7 +29,19 @@ jobs:
           fi
           echo "new=$NEW" >> $GITHUB_OUTPUT
 
+      - name: Check tag exists
+        id: check
+        run: |
+          VERSION="${{ steps.version.outputs.new }}"
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists. Nothing to release."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create release branch and PR
+        if: steps.check.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
@@ -43,6 +55,7 @@ jobs:
           git add VERSION
           git commit -m "chore: release v${VERSION}"
 
+          git push origin --delete "$BRANCH" 2>/dev/null || true
           git push origin "HEAD:${BRANCH}"
 
           gh pr create \
