@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   release:
@@ -34,14 +35,34 @@ jobs:
         run: |
           echo "${{ steps.version.outputs.new }}" > VERSION
 
-      - name: Commit and tag
+      - name: Tag release
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add VERSION
           git commit -m "chore: bump version to ${{ steps.version.outputs.new }} [skip ci]"
           git tag "v${{ steps.version.outputs.new }}"
-          git push origin main --tags
+          git push origin "v${{ steps.version.outputs.new }}"
+
+      - name: Create bump PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/bump-v${{ steps.version.outputs.new }}"
+          git push origin HEAD:"$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: bump version to v${{ steps.version.outputs.new }}" \
+            --body "Automated version bump after release v${{ steps.version.outputs.new }}."
+
+      - name: Auto-merge bump PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/bump-v${{ steps.version.outputs.new }}"
+          PR_URL=$(gh pr list --head "$BRANCH" --json url --jq '.[0].url')
+          gh pr merge --auto --squash "$PR_URL"
 
       - name: Create GitHub Release
         env:
