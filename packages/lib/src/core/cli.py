@@ -51,7 +51,12 @@ def _scroll(direction):
 
     new_dir, new_idx = items[(idx + direction) % len(items)]
     new_metric = _first_metric_for(cache, new_dir, new_idx)
-    state.save_selected({"provider": new_dir, "idx": new_idx, "metric": new_metric})
+    
+    selected["provider"] = new_dir
+    selected["idx"] = new_idx
+    selected["metric"] = new_metric
+    
+    state.save_selected(selected)
 
 def scroll_up():
     _scroll(-1)
@@ -88,7 +93,12 @@ def cycle_metric():
         pos = -1
     
     new_metric = cycle[(pos + 1) % len(cycle)]
-    state.save_selected({"provider": provider, "idx": idx, "metric": new_metric})
+    
+    selected["provider"] = provider
+    selected["idx"] = idx
+    selected["metric"] = new_metric
+
+    state.save_selected(selected)
 
 def print_logo():
     selected = state.load_selected() or {}
