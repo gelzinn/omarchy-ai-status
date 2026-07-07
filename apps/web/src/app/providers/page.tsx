@@ -1,6 +1,6 @@
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { SUPPORTED_PROVIDERS } from "@/lib/providers";
+import { SUPPORTED_PROVIDERS } from "@ai-status/shared";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

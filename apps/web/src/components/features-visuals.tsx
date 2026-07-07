@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Layers, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PROVIDERS } from "@/lib/providers";
+import { PROVIDERS } from "@ai-status/shared";
 
 export function MultiProviderVisual() {
   return (

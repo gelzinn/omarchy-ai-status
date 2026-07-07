@@ -3,7 +3,7 @@
 import { Bot, Wifi, Bluetooth } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
-import { PROVIDERS } from "@/lib/providers";
+import { PROVIDERS } from "@ai-status/shared";
 import { PROJECT_NAME } from "@/lib/env";
 
 type Stat = {
@@ -65,8 +65,8 @@ const WAYBAR_DATA: WaybarData[] = [
     ],
   },
   {
-    provider: `${PROVIDERS.Z_AI.name} Coding Plan (PRO)`,
-    logo: PROVIDERS.Z_AI.logo,
+    provider: `${PROVIDERS.ZAI.name} Coding Plan (PRO)`,
+    logo: PROVIDERS.ZAI.logo,
     stats: [
       { label: "Rolling Usage:", percent: 0, resets: "no reset available" },
       { label: "Weekly Usage:", percent: 6, resets: "Resets in 7h 26m" },
@@ -378,7 +378,7 @@ export function WaybarReplica({ version }: { version: string }) {
                               className={cn(
                                 "text-muted-foreground/60",
                                 stat.resets === "no reset available" &&
-                                  "opacity-50",
+                                "opacity-50",
                               )}
                             >
                               {stat.resets}
