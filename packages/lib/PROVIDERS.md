@@ -1,6 +1,6 @@
 # Providers & Authentication Guide
 
-**Omarchy AI Status never ships or hardcodes API keys.** Every provider script reads credentials from your existing local authentication files -- OpenCode tokens, Copilot OAuth sessions, `.codex/auth.json`, and similar. Below is how each provider authenticates.
+**AI Status never ships or hardcodes API keys.** Every provider script reads credentials from your existing local authentication files -- OpenCode tokens, Copilot OAuth sessions, `.codex/auth.json`, and similar. Below is how each provider authenticates.
 
 ## Provider Overview
 

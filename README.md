@@ -1,6 +1,6 @@
-# Omarchy AI Status
+# AI Status
 
-**Monitor AI provider usage limits in your Waybar -- across Claude, Copilot, Codex, Z.AI, Kiro, Antigravity, and OpenCode in real time.**
+Monitor AI provider usage limits in your Waybar — across Claude, Copilot, Codex, Z.AI, Kiro, Antigravity, and OpenCode in real time.
 
 <img width="348" height="954" alt="Screenshot" src="https://github.com/user-attachments/assets/dcba0b97-d462-452e-b1b6-000cc445b803" />
 
@@ -32,7 +32,7 @@ See the [Providers & Authentication Guide](PROVIDERS.md) for setup details.
 ## Quick Start
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/omarchy-ai-status/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/install.sh)
 ```
 
 This single command installs, configures symlinks, and restarts Waybar. Run it again to update.

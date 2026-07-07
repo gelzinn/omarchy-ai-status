@@ -1,16 +1,16 @@
-# Installing Omarchy AI Status
+# Installing AI Status
 
 ## Quick Install
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/omarchy-ai-status/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/install.sh)
 ```
 
 ## From a Local Clone
 
 ```bash
-git clone https://github.com/gelzinn/omarchy-ai-status.git
-cd omarchy-ai-status
+git clone https://github.com/gelzinn/ai-status.git
+cd ai-status
 ./install.sh
 ```
 
@@ -18,7 +18,7 @@ cd omarchy-ai-status
 
 | Step | Action |
 |---|---|
-| 1 | Clones (or pulls) the repository to `~/.local/share/omarchy-ai-status/` |
+| 1 | Clones (or pulls) the repository to `~/.local/share/ai-status/` |
 | 2 | Checks system dependencies (Linux, Waybar, python3, jq, curl, git) |
 | 3 | Creates a symlink at `~/.local/bin/waybar-ai-status` |
 | 4 | Restarts Waybar to load the new module |

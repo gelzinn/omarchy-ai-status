@@ -6,12 +6,12 @@ if [ -f "$SCRIPT_DIR/config.sh" ]; then
     # shellcheck source=./config.sh
     source "$SCRIPT_DIR/config.sh"
 fi
-: "${REPO_URL:=https://github.com/gelzinn/omarchy-ai-status}"
-INSTALL_DIR="$HOME/.local/share/omarchy-ai-status"
+: "${REPO_URL:=https://github.com/gelzinn/ai-status}"
+INSTALL_DIR="$HOME/.local/share/ai-status"
 BIN_DIR="$HOME/.local/bin"
 
 if [ -d "$INSTALL_DIR/.git" ]; then
-    echo "Updating Omarchy AI Status..."
+    echo "Updating AI Status..."
     git -C "$INSTALL_DIR" pull --ff-only
 elif [ -d "$INSTALL_DIR" ]; then
     rm -rf "$INSTALL_DIR"
@@ -23,7 +23,7 @@ elif git -C "$SCRIPT_DIR" rev-parse --git-dir > /dev/null 2>&1; then
     # Running from a local clone — copy directly
     cp -r "$SCRIPT_DIR" "$INSTALL_DIR"
 else
-    echo "Installing Omarchy AI Status..."
+    echo "Installing AI Status..."
     git clone "$REPO_URL" "$INSTALL_DIR"
 fi
 

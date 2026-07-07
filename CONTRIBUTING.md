@@ -1,4 +1,4 @@
-# Contributing to Omarchy AI Status
+# Contributing to AI Status
 
 **Bug reports, feature requests, and pull requests are welcome.**
 
