@@ -43,12 +43,12 @@ Then add the module to your Waybar config:
 "custom/ai-status": {
     "format": "{}",
     "return-type": "json",
-    "exec": "~/.local/bin/waybar-ai-status daemon",
-    "on-click": "~/.local/bin/waybar-ai-status refresh",
-    "on-click-right": "~/.local/bin/waybar-ai-status config",
-    "on-scroll-up": "~/.local/bin/waybar-ai-status scroll-up",
-    "on-scroll-down": "~/.local/bin/waybar-ai-status scroll-down",
-    "on-click-middle": "~/.local/bin/waybar-ai-status cycle-metric",
+    "exec": "~/.local/bin/ai-status daemon",
+    "on-click": "~/.local/bin/ai-status refresh",
+    "on-click-right": "~/.local/bin/ai-status config",
+    "on-scroll-up": "~/.local/bin/ai-status scroll-up",
+    "on-scroll-down": "~/.local/bin/ai-status scroll-down",
+    "on-click-middle": "~/.local/bin/ai-status cycle-metric",
     "tooltip": true
 }
 ```
@@ -65,7 +65,7 @@ The daemon outputs JSON for Waybar's `return-type: json` custom module format, w
 
 | Path | Purpose |
 |---|---|
-| `src/bin/waybar-ai-status` | CLI entry point |
+| `src/bin/ai-status` | CLI entry point |
 | `src/core/` | Core logic: daemon, fetch, render, state, config management |
 | `src/providers/<name>/` | Per-provider query and parse scripts |
 | `install.sh` | Self-updating install script |

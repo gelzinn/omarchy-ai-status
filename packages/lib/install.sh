@@ -33,7 +33,7 @@ bash "$INSTALL_DIR/packages/lib/check.sh"
 
 # Create executable symlink
 mkdir -p "$BIN_DIR"
-ln -sf "$INSTALL_DIR/packages/lib/src/bin/waybar-ai-status" "$BIN_DIR/waybar-ai-status"
+ln -sf "$INSTALL_DIR/packages/lib/src/bin/ai-status" "$BIN_DIR/ai-status"
 
 # Restart Waybar to pick up the new module
 if command -v waybar &>/dev/null; then

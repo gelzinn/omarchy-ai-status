@@ -52,12 +52,12 @@ export default async function Homepage() {
   const waybarConfig = `"custom/ai-status": {
     "format": "{}",
     "return-type": "json",
-    "exec": "~/.local/bin/waybar-ai-status daemon",
-    "on-click": "~/.local/bin/waybar-ai-status refresh",
-    "on-click-right": "~/.local/bin/waybar-ai-status config",
-    "on-scroll-up": "~/.local/bin/waybar-ai-status scroll-up",
-    "on-scroll-down": "~/.local/bin/waybar-ai-status scroll-down",
-    "on-click-middle": "~/.local/bin/waybar-ai-status cycle-metric",
+    "exec": "~/.local/bin/ai-status daemon",
+    "on-click": "~/.local/bin/ai-status refresh",
+    "on-click-right": "~/.local/bin/ai-status config",
+    "on-scroll-up": "~/.local/bin/ai-status scroll-up",
+    "on-scroll-down": "~/.local/bin/ai-status scroll-down",
+    "on-click-middle": "~/.local/bin/ai-status cycle-metric",
     "tooltip": true
 }`;
 

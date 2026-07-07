@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from . import __version__
 from . import config as cfgmod
 
-CACHE_DIR = os.path.join(tempfile.gettempdir(), "waybar-ai-status-cache")
+CACHE_DIR = os.path.join(tempfile.gettempdir(), "ai-status-cache")
 CACHE_TTL = 3600
 
 

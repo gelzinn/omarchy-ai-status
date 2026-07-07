@@ -112,7 +112,7 @@ Each provider lives in `src/providers/<name>/` with two files:
 | `query.sh` | Fetches raw data -- makes API calls, runs CLI commands, or scrapes output |
 | `parse.py` | Parses the raw output into a standardized JSON structure via a `parse(raw_output)` function |
 
-To add a new provider, create a new directory under `src/providers/` with these two files and register it via `waybar-ai-status config`.
+To add a new provider, create a new directory under `src/providers/` with these two files and register it via `ai-status config`.
 
 ## Troubleshooting
 
