@@ -21,26 +21,29 @@ elif [ "$SCRIPT_DIR" = "$INSTALL_DIR" ]; then
     :
 elif git -C "$SCRIPT_DIR" rev-parse --git-dir > /dev/null 2>&1; then
     # Running from a local clone — copy directly
-    cp -r "$SCRIPT_DIR" "$INSTALL_DIR"
+    REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+    cp -r "$REPO_ROOT" "$INSTALL_DIR"
 else
     echo "Installing AI Status..."
     git clone "$REPO_URL" "$INSTALL_DIR"
 fi
 
 # Check requirements
-bash "$INSTALL_DIR/check.sh"
+bash "$INSTALL_DIR/packages/lib/check.sh"
 
 # Create executable symlink
 mkdir -p "$BIN_DIR"
-ln -sf "$INSTALL_DIR/src/bin/waybar-ai-status" "$BIN_DIR/waybar-ai-status"
+ln -sf "$INSTALL_DIR/packages/lib/src/bin/waybar-ai-status" "$BIN_DIR/waybar-ai-status"
 
 # Restart Waybar to pick up the new module
 if command -v waybar &>/dev/null; then
     echo "Restarting Waybar..."
-    pkill waybar 2>/dev/null || true
-    sleep 0.5
-    nohup waybar >/dev/null 2>&1 &
-    disown
+    pkill -SIGUSR2 waybar 2>/dev/null || true
+    # If the user relies on restarting via nohup, we can also try that if pkill fails
+    if ! pgrep -x waybar > /dev/null; then
+        nohup waybar >/dev/null 2>&1 &
+        disown
+    fi
 fi
 
 echo "Done!"

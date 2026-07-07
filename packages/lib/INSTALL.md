@@ -3,7 +3,7 @@
 ## Quick Install
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/packages/lib/install.sh)
 ```
 
 ## From a Local Clone
@@ -11,7 +11,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/insta
 ```bash
 git clone https://github.com/gelzinn/ai-status.git
 cd ai-status
-./install.sh
+./packages/lib/install.sh
 ```
 
 ## What the Install Script Does

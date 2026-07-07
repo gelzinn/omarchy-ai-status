@@ -32,7 +32,7 @@ See the [Providers & Authentication Guide](PROVIDERS.md) for setup details.
 ## Quick Start
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/packages/lib/install.sh)
 ```
 
 This single command installs, configures symlinks, and restarts Waybar. Run it again to update.
