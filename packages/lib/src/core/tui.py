@@ -32,7 +32,7 @@ def get_selectable_items():
     return items
 
 def run():
-    all_providers = config.available_providers()
+    all_providers = sorted(config.available_providers())
     if not all_providers:
         return
 
@@ -145,7 +145,7 @@ def run():
         stdscr.addstr(9, 0, icon_text, attr)
 
         # Header for providers
-        header_text = "--- Providers List (SPACE to toggle, J/K to reorder) ---"
+        header_text = "--- Providers List (SPACE to toggle, Shift+J/K to reorder) ---"
         if len(header_text) > w:
             header_text = header_text[:w]
         stdscr.addstr(11, 0, header_text, curses.A_DIM)
@@ -167,7 +167,7 @@ def run():
 
         help_text = (
             "\u2191\u2193 navigate  \u2190\u2192 change active  "
-            "SPACE toggle  K/J move  ENTER save  ESC cancel"
+            "SPACE toggle  Shift+J/K move  ENTER save  ESC cancel"
         )
         stdscr.addstr(h - 1, max(0, (w - len(help_text)) // 2), help_text)
 
@@ -213,9 +213,9 @@ def run():
                 if config_changed:
                     state.trigger_refresh()
             break
-        elif key in (curses.KEY_UP, ord("k")) and selected_idx > 0 and (key != ord("k") or selected_idx < 6):
+        elif key in (curses.KEY_UP, ord("k")) and selected_idx > 0:
             selected_idx -= 1
-        elif key in (curses.KEY_DOWN, ord("j")) and selected_idx < max_idx and (key != ord("j") or selected_idx < 6):
+        elif key in (curses.KEY_DOWN, ord("j")) and selected_idx < max_idx:
             selected_idx += 1
         elif key in (curses.KEY_LEFT,):
             if selected_idx == 0:
