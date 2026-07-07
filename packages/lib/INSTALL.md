@@ -1,5 +1,8 @@
 # Installing AI Status
 
+## ⚠️ Upgrading from v0.4.x (omarchy-ai-status)?
+The project has been renamed to **AI Status**. When you run the install script below, your existing configurations will be migrated automatically. However, **you must update your Waybar config** to use the new `ai-status` command instead of `waybar-ai-status`.
+
 ## Quick Install
 
 ```bash

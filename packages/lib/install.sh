@@ -10,6 +10,18 @@ fi
 INSTALL_DIR="$HOME/.local/share/ai-status"
 BIN_DIR="$HOME/.local/bin"
 
+# Migrate old config and cache from waybar-ai-status to ai-status
+if [ -d "$HOME/.config/waybar-ai-status" ] && [ ! -d "$HOME/.config/ai-status" ]; then
+    mv "$HOME/.config/waybar-ai-status" "$HOME/.config/ai-status"
+fi
+if [ -L "$BIN_DIR/waybar-ai-status" ]; then
+    rm -f "$BIN_DIR/waybar-ai-status"
+fi
+if [ -d "$HOME/.local/share/omarchy-ai-status" ] && [ ! -d "$INSTALL_DIR" ]; then
+    echo "Migrating old installation directory..."
+    mv "$HOME/.local/share/omarchy-ai-status" "$INSTALL_DIR"
+fi
+
 if [ -d "$INSTALL_DIR/.git" ]; then
     echo "Updating AI Status..."
     git -C "$INSTALL_DIR" pull --ff-only
