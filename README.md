@@ -35,30 +35,49 @@ The project has been renamed to **AI Status**. When you run the install script b
 ## Quick Start
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/packages/lib/install.sh)
+curl -fsSL https://ai-status.gelzin.com/install | bash
 ```
 
-This single command installs, configures symlinks, and restarts Waybar. Run it again to update.
+The installer walks you through a short setup — choose how the module looks (provider logo, plan, percentage) and let it **configure Waybar for you**. It backs up your existing config first, so if anything looks off you can undo everything with `ai-status revert`. Run the same command again anytime to update.
 
-Then add the module to your Waybar config:
+**If you let the installer configure Waybar, you're all set** — jump to [how it works](#how-it-works). The steps below are only needed if you opted out of automatic setup.
+
+### Manual Waybar setup
+
+Add the module definition to `~/.config/waybar/config.jsonc`:
 
 ```jsonc
 "custom/ai-status": {
-    "format": "{}",
-    "return-type": "json",
     "exec": "~/.local/bin/ai-status daemon",
+    "restart-interval": 1,
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": true,
     "on-click": "~/.local/bin/ai-status refresh",
     "on-click-right": "~/.local/bin/ai-status config",
     "on-scroll-up": "~/.local/bin/ai-status scroll-up",
     "on-scroll-down": "~/.local/bin/ai-status scroll-down",
-    "on-click-middle": "~/.local/bin/ai-status cycle-metric",
-    "tooltip": true
+    "on-click-middle": "~/.local/bin/ai-status cycle-metric"
 }
 ```
 
-The status bar shows the usage percentage of the active provider. Scroll up/down to switch providers, middle-click to cycle through the active provider's limits (rolling, weekly, monthly — including per-model ones, like Claude's Fable weekly). Right-click opens the provider configuration TUI -- toggle providers on or off and reorder them. Hover to see all providers with full details (the active one is marked with →).
+Then reference it in whichever bar section you use — a module that's defined but not listed in a `modules-*` array **won't render**:
 
-**Want the provider's logo too?** Run the installer with `--icon-mode logo`, or add the `image#ai-status` module manually (see [INSTALL.md](packages/lib/INSTALL.md)). The logo sits next to the text and shows the same tooltip on hover.
+```jsonc
+{
+    // ...
+    "modules-right": [
+        "custom/ai-status",
+        "clock",
+        "tray"
+    ]
+    // ...
+}
+```
+
+**Want the provider's logo too?** Install with `--icon-mode logo` (or add it by hand — see [INSTALL.md](packages/lib/INSTALL.md)). It adds an `image#ai-status` module next to the text that shows the same tooltip on hover; just remember to list `"image#ai-status"` in `modules-right` alongside `"custom/ai-status"`.
+
+The status bar shows the usage percentage of the active provider. Scroll up/down to switch providers, middle-click to cycle through the active provider's limits (rolling, weekly, monthly — including per-model ones, like Claude's Fable weekly). Right-click opens the provider configuration TUI -- toggle providers on or off and reorder them. Hover to see all providers with full details (the active one is marked with →).
 
 ## How It Works
 

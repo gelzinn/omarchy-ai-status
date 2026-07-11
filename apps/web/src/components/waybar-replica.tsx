@@ -4,7 +4,7 @@ import { Bot, Wifi, Bluetooth } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { PROVIDERS } from "@ai-status/shared";
-import { PROJECT_NAME } from "@/lib/env";
+import { site } from "@/lib/env";
 
 type Stat = {
   label: string;
@@ -255,7 +255,7 @@ export function WaybarReplica({ version }: { version: string }) {
             <div className="flex flex-col gap-2 p-4 border-b border-border/50">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="font-semibold text-foreground">
-                  {PROJECT_NAME}
+                  {site.name}
                 </span>
 
                 <span className="text-muted-foreground">{version}</span>

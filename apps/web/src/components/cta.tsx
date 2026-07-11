@@ -1,12 +1,12 @@
 import { HighlightedCodeBlock } from "./code-highlight";
 import { InstallTabs } from "./install-tabs";
-import { REPO_URL, REPO_RAW_INSTALL_URL } from "@/lib/env";
+import { site, repo } from "@/lib/env";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { GithubIcon } from "@/components/github-icon";
 
 export function Cta() {
-	const installCmd = `curl -fsSL ${REPO_RAW_INSTALL_URL} | bash`;
+	const installCmd = `curl -fsSL ${site.installUrl} | bash`;
 	return (
 		<section className="relative flex flex-col items-center gap-8 rounded-3xl sm:rounded-[2rem] border border-border bg-card/50 px-6 py-12 sm:p-16 sm:py-24 text-center mt-24 overflow-hidden shadow-2xl">
 			{/* Ambient Glowing Background */}
@@ -56,7 +56,7 @@ export function Cta() {
 
 			<div className="relative z-10 flex w-full flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-6">
 				<a
-					href={REPO_URL}
+					href={repo.url}
 					target="_blank"
 					rel="noreferrer"
 					className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-foreground px-8 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/90 shadow-sm"

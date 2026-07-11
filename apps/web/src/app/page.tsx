@@ -4,20 +4,13 @@ import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
 import { CodeBlock } from "@/components/code-block";
 import { HighlightedCodeBlock } from "@/components/code-highlight";
-import {
-  MultiProviderVisual,
-  LiveUpdatesVisual,
-  TooltipDetailVisual,
-  ConfigurableVisual,
-  SelfUpdatingVisual,
-  ZeroDependenciesVisual,
-} from "@/components/features-visuals";
+import { FeatureVisuals } from "@/components/features-visuals";
 import { WaybarReplica } from "@/components/waybar-replica";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { SUPPORTED_PROVIDERS } from "@ai-status/shared";
-import { REPO_API_URL, REPO_URL } from "@/lib/env";
+import { repo } from "@/lib/env";
 import {
   WAYBAR_CUSTOM_MODULE,
   WAYBAR_LOGO_MODULE,
@@ -25,11 +18,11 @@ import {
 } from "@/lib/waybar-config";
 
 export default async function Homepage() {
-  let latestVersion = "v1.3.0";
-  let oldVersion = "v1.2.0";
+  let latestVersion = "v0.6.1";
+  let oldVersion = "v0.6.0";
 
   try {
-    const res = await fetch(REPO_API_URL, {
+    const res = await fetch(repo.apiUrl, {
       next: { revalidate: 3600 },
     });
 
@@ -178,38 +171,38 @@ export default async function Homepage() {
                 </p>
               </div>
               <div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-4">
                   {[
                     {
                       title: "Multi-Provider",
                       description:
                         "Tracks API usage limits across seven AI services simultaneously.",
-                      visual: MultiProviderVisual,
+                      visual: FeatureVisuals.MultiProvider,
                     },
                     {
                       title: "Live Updates",
                       description:
                         "Auto-refreshes every 5 minutes with animated loading states.",
-                      visual: LiveUpdatesVisual,
+                      visual: FeatureVisuals.LiveUpdates,
                     },
                     {
                       title: "Tooltip Detail",
                       description:
                         "Per-provider breakdown with progress bars, percentages, and reset timers.",
-                      visual: TooltipDetailVisual,
+                      visual: FeatureVisuals.TooltipDetail,
                     },
                     {
                       title: "Configurable",
                       description:
                         "Enable, disable, or reorder providers via an interactive TUI (right-click).",
-                      visual: ConfigurableVisual,
+                      visual: FeatureVisuals.Configurable,
                     },
                     {
                       title: "Self-Updating",
                       description:
                         "One command installs and keeps the module up to date automatically.",
                       visual: () => (
-                        <SelfUpdatingVisual
+                        <FeatureVisuals.SelfUpdating
                           latestVersion={latestVersion}
                           oldVersion={oldVersion}
                         />
@@ -219,7 +212,7 @@ export default async function Homepage() {
                       title: "Zero Dependencies",
                       description:
                         "Written in pure Python and Bash. No heavy runtimes required.",
-                      visual: ZeroDependenciesVisual,
+                      visual: FeatureVisuals.ZeroDependencies,
                     },
                   ].map((feature) => (
                     <div
@@ -259,7 +252,7 @@ export default async function Homepage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 items-center mt-4">
+            <div className="flex flex-wrap gap-2 items-center">
               {SUPPORTED_PROVIDERS.map((provider) => (
                 <div
                   key={provider.name}
@@ -280,7 +273,7 @@ export default async function Homepage() {
               <a
                 target="_blank"
                 rel="noreferrer"
-                href={`${REPO_URL}/issues/new`}
+                href={`${repo.url}/issues/new`}
                 className="group flex items-center gap-2 rounded-full border border-dashed border-border bg-card px-4 py-2 transition-all text-muted-foreground/50"
               >
                 <span className="flex size-5 items-center justify-center rounded-sm transition-colors group-hover:text-foreground">

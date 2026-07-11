@@ -5,7 +5,7 @@
 ## Update Command
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/gelzinn/ai-status/main/packages/lib/install.sh)
+curl -fsSL https://ai-status.gelzin.com/install | bash
 ```
 
 Or from a local clone:
