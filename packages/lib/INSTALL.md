@@ -53,29 +53,30 @@ If you skipped automatic Waybar setup, add these blocks to `~/.config/waybar/con
 }
 ```
 
-To also show the provider logo, add this image module.
+To also show the provider logo (with the same tooltip on hover), add this image module.
 
-> The one-command install with `--icon-mode logo` sets all of this up for you (absolute path, signal, size, and logo mode). The manual steps below are only needed if you skipped automatic Waybar setup.
+> The one-command install with `--icon-mode logo` sets all of this up for you. The manual steps below are only needed if you skipped automatic Waybar setup.
 
 ```jsonc
 "image#ai-status": {
-    "path": "/home/YOUR_USERNAME/.cache/ai-status/logos/current.png",
+    "exec": "~/.local/bin/ai-status logo",
     "size": 14,
+    "interval": 3,
     "signal": 11,
     "on-click": "~/.local/bin/ai-status refresh",
     "on-click-right": "~/.local/bin/ai-status config",
     "on-scroll-up": "~/.local/bin/ai-status scroll-up",
     "on-scroll-down": "~/.local/bin/ai-status scroll-down",
     "on-click-middle": "~/.local/bin/ai-status cycle-metric",
-    "tooltip": false
+    "tooltip": true
 }
 ```
 
 Notes for the logo module:
 
-- **Use an absolute `path`** — Waybar does not expand `~` in `path`, so replace `YOUR_USERNAME` with your user. (The `on-*` handlers run through a shell, so `~` is fine there.)
-- ai-status keeps `current.png` in sync with the selected provider and reloads it live via `"signal": 11`. Do **not** use `"exec"` here — Waybar's image `exec` mode blanks the whole bar on some builds.
-- Rendering the logo needs an SVG rasterizer (`imagemagick` or `librsvg`); without it the logo is simply skipped.
+- `ai-status logo` prints the logo PNG path on line 1 and the tooltip on line 2, so hovering the logo shows the same breakdown (loading animation included) as the text module.
+- `"interval"` is required for the image to render; `"signal": 11` refreshes it instantly on provider/data changes.
+- Rendering the logo needs an SVG rasterizer (`imagemagick` or `librsvg`); logos are rasterised to opaque RGB PNGs. Without a rasterizer the logo is simply skipped.
 
 Include both in your layout section, with `image#ai-status` before `custom/ai-status`:
 
@@ -91,6 +92,16 @@ Include both in your layout section, with `image#ai-status` before `custom/ai-st
 
 Then enable logo mode: right-click the module, open the config TUI, set **Provider Icon** to **Provider Logo**.
 
+## Reverting
+
+When you let the installer configure Waybar automatically, it backs up your existing config to `~/.config/waybar/config.jsonc.ai-status.bak` **before** touching anything. If something looks off, restore it with:
+
+```bash
+ai-status revert
+```
+
+This copies the backup back (saving the current one as `.pre-revert` first) and reloads Waybar. If you added the modules by hand, there's no backup — just remove them yourself.
+
 ## Usage
 
 | Action | Behavior |
@@ -98,7 +109,7 @@ Then enable logo mode: right-click the module, open the config TUI, set **Provid
 | Left-click | Refresh data immediately |
 | Right-click | Open provider configuration TUI |
 | Scroll up/down | Switch between providers |
-| Middle-click | Cycle metric type (rolling → weekly → monthly) |
+| Middle-click | Cycle through the provider's limits (rolling → weekly → monthly, and per-model ones like Claude's Fable weekly) |
 
 The config TUI lets you enable/disable providers, reorder with Shift+J/K, toggle display settings, and switch icon modes (bot, logo, off).
 

@@ -68,6 +68,9 @@ if [ -d "$HOME/.local/share/omarchy-ai-status" ] && [ ! -d "$INSTALL_DIR" ]; the
     mv "$HOME/.local/share/omarchy-ai-status" "$INSTALL_DIR"
 fi
 
+# Ensure the parent exists before cp/clone — a minimal $HOME may lack ~/.local/share.
+mkdir -p "$(dirname "$INSTALL_DIR")"
+
 if [ -d "$INSTALL_DIR/.git" ]; then
     echo -e "  ${C_DIM}> updating...${C_RESET}"
     git -C "$INSTALL_DIR" pull --ff-only 2>&1 | while IFS= read -r line; do echo -e "  ${C_DIM}${line}${C_RESET}"; done
@@ -98,24 +101,34 @@ fi
 # ═══════════════════════════════════════════════════════════
 
 if [ "$NON_INTERACTIVE" = false ]; then
-    if [ ! -t 0 ]; then
-        echo -e "  ${C_DIM}non-interactive mode — using defaults${C_RESET}"
-        CONFIGURE_WAYBAR="false"
-    elif [ -n "$CONFIGURE_WAYBAR" ]; then
+    if [ -n "$CONFIGURE_WAYBAR" ]; then
         echo -e "  ${C_DIM}flags detected — skipping interactive setup${C_RESET}"
-    else
+    elif { true >/dev/tty; } 2>/dev/null; then
+        # A terminal is attached — run the wizard reading from /dev/tty. This
+        # works even when stdin is a pipe (the common `curl ... | bash`), which
+        # the old `[ -t 0 ]` check skipped, leaving waybar unconfigured.
         WIZARD_SCRIPT="$INSTALL_DIR/packages/lib/install-wizard.py"
         [ "$USE_LOCAL_LIB" = true ] && WIZARD_SCRIPT="$SCRIPT_DIR/install-wizard.py"
         [ ! -f "$WIZARD_SCRIPT" ] && WIZARD_SCRIPT="$SCRIPT_DIR/install-wizard.py"
         WIZARD_OUT="/tmp/ai-status-wizard.json"
-        python3 "$WIZARD_SCRIPT" "$WIZARD_OUT"
-        eval "$(python3 -c "
+        # If the user cancels the wizard (Ctrl-C -> exit 1), don't let `set -e`
+        # abort mid-install and leave a half-state — finish with defaults.
+        if python3 "$WIZARD_SCRIPT" "$WIZARD_OUT"; then
+            eval "$(python3 -c "
 import json
 with open('$WIZARD_OUT') as f:
     d = json.load(f)
 for k, v in d.items():
     print(f'{k}={v}')
 ")"
+        else
+            echo -e "  ${C_DIM}setup cancelled — installing with defaults (run 'ai-status config' to change)${C_RESET}"
+        fi
+    else
+        # Truly no terminal (cron/CI/headless) — configure with defaults instead
+        # of leaving a half-install where waybar never gets the module.
+        echo -e "  ${C_DIM}no terminal — configuring with defaults${C_RESET}"
+        CONFIGURE_WAYBAR="true"
     fi
 fi
 
@@ -213,16 +226,68 @@ config_path = sys.argv[1]
 wants_logo = sys.argv[2] == "true"
 changed = False
 
+def _strip_comments(text):
+    # Remove // and /* */ comments, but never touch characters inside strings
+    # (a naive regex would eat the // in "https://..." and break the config).
+    out, i, n, in_str = [], 0, len(text), False
+    while i < n:
+        c = text[i]
+        if in_str:
+            out.append(c)
+            if c == "\\" and i + 1 < n:
+                out.append(text[i + 1]); i += 2; continue
+            if c == '"':
+                in_str = False
+            i += 1; continue
+        if c == '"':
+            in_str = True; out.append(c); i += 1; continue
+        if c == "/" and i + 1 < n and text[i + 1] == "/":
+            while i < n and text[i] != "\n":
+                i += 1
+            continue
+        if c == "/" and i + 1 < n and text[i + 1] == "*":
+            i += 2
+            while i + 1 < n and not (text[i] == "*" and text[i + 1] == "/"):
+                i += 1
+            i += 2; continue
+        out.append(c); i += 1
+    return "".join(out)
+
+
+def _strip_trailing_commas(text):
+    out, i, n, in_str = [], 0, len(text), False
+    while i < n:
+        c = text[i]
+        if in_str:
+            out.append(c)
+            if c == "\\" and i + 1 < n:
+                out.append(text[i + 1]); i += 2; continue
+            if c == '"':
+                in_str = False
+            i += 1; continue
+        if c == '"':
+            in_str = True; out.append(c); i += 1; continue
+        if c == ",":
+            j = i + 1
+            while j < n and text[j] in " \t\r\n":
+                j += 1
+            if j < n and text[j] in "}]":
+                i += 1; continue
+        out.append(c); i += 1
+    return "".join(out)
+
+
 config = {}
 if os.path.exists(config_path):
     with open(config_path) as f:
         raw = f.read()
-    cleaned = re.sub(r'//.*', '', raw)
-    cleaned = re.sub(r',\s*([}\]])', r'\1', cleaned)
     try:
-        config = json.loads(cleaned)
-    except:
-        status("warning: could not parse waybar config (will not modify)")
+        config = json.loads(_strip_trailing_commas(_strip_comments(raw)))
+    except Exception:
+        status("warning: could not parse waybar config (leaving it untouched)")
+        sys.exit(0)
+    if not isinstance(config, dict):
+        status("waybar config is a list (multi-bar setup) — add the modules manually")
         sys.exit(0)
 
 custom_module = {
@@ -238,19 +303,20 @@ custom_module = {
     "on-click-middle": "~/.local/bin/ai-status cycle-metric",
 }
 
-# NOTE: the image module reads a static `path` (not `exec`): waybar's image
-# `exec` mode leaves the whole bar blank on some builds. ai-status keeps
-# `current.png` in sync with the selected provider and reloads it via `signal`.
+# The image module runs `ai-status logo`, which prints the PNG path on line 1
+# and the tooltip on line 2 — so hovering the logo shows the same breakdown as
+# the text module. `signal` reloads it when the provider/data changes.
 logo_module = {
-    "path": os.path.expanduser("~/.cache/ai-status/logos/current.png"),
+    "exec": "~/.local/bin/ai-status logo",
     "size": 14,
+    "interval": 3,
     "signal": 11,
     "on-click": "~/.local/bin/ai-status refresh",
     "on-click-right": "~/.local/bin/ai-status config",
     "on-scroll-up": "~/.local/bin/ai-status scroll-up",
     "on-scroll-down": "~/.local/bin/ai-status scroll-down",
     "on-click-middle": "~/.local/bin/ai-status cycle-metric",
-    "tooltip": False,
+    "tooltip": True,
 }
 
 CUSTOM_KEY = "custom/ai-status"
@@ -269,9 +335,16 @@ if wants_logo:
 else:
     config.pop(LOGO_KEY, None)
 
-MODULES_KEYS = [k for k in config if k.endswith("-right") or k == "modules-right"]
+MODULES_KEYS = [k for k in config if k == "modules-right" or k.endswith("-right")]
 if not MODULES_KEYS:
-    MODULES_KEYS = [k for k in config if k.endswith("-left") or k.endswith("-center") or k.startswith("modules-")]
+    # No right section — fall back to a SINGLE section so the module isn't added
+    # to several layouts at once (which would show it more than once).
+    for cand in ("modules-center", "modules-left"):
+        if isinstance(config.get(cand), list):
+            MODULES_KEYS = [cand]
+            break
+    else:
+        MODULES_KEYS = [k for k in config if k.startswith("modules-") and isinstance(config.get(k), list)][:1]
 
 def ensure_in_layout(section, module_key, after_key=None):
     global changed
@@ -327,10 +400,13 @@ if changed:
         shutil.copy2(config_path, backup)
         status(f"backup saved at {backup}")
 
+    # json.dumps already emits lowercase true/false; write atomically via a temp
+    # file + rename so a failure mid-write can never truncate the real config.
     pretty = json.dumps(config, indent=2, ensure_ascii=False)
-    pretty = pretty.replace("True", "true").replace("False", "false")
-    with open(config_path, 'w') as f:
+    tmp = config_path + ".tmp"
+    with open(tmp, "w") as f:
         f.write(pretty + "\n")
+    os.replace(tmp, config_path)
     status(f"waybar config updated: {config_path}")
 else:
     status("waybar config already up to date")
@@ -341,6 +417,53 @@ PYEOF
     if [ "$WANTS_LOGO" = true ]; then
         "$BIN_DIR/ai-status" logo >/dev/null 2>&1 || true
     fi
+
+    echo ""
+    echo -e "  ${C_DIM}Your original Waybar config was backed up. If anything looks off,${C_RESET}"
+    echo -e "  ${C_DIM}run${C_RESET} ${C_CYAN}ai-status revert${C_RESET} ${C_DIM}to restore it.${C_RESET}"
+elif command -v waybar &>/dev/null; then
+    # Manual mode — the user chose to add the modules themselves. Print the
+    # blocks to copy (same as the docs / landing page). Nothing is touched, so
+    # there's no backup to worry about.
+    echo ""
+    echo -e "  ${C_PURPLE}${C_DIM}manual waybar setup${C_RESET}"
+    echo -e "  ${C_DIM}Add this to ${WAYBAR_CONFIG} and put \"custom/ai-status\"${C_RESET}"
+    echo -e "  ${C_DIM}(and \"image#ai-status\") in your \"modules-right\":${C_RESET}"
+    echo ""
+    cat <<'MANUAL'
+  "custom/ai-status": {
+    "exec": "~/.local/bin/ai-status daemon",
+    "restart-interval": 1,
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": true,
+    "on-click": "~/.local/bin/ai-status refresh",
+    "on-click-right": "~/.local/bin/ai-status config",
+    "on-scroll-up": "~/.local/bin/ai-status scroll-up",
+    "on-scroll-down": "~/.local/bin/ai-status scroll-down",
+    "on-click-middle": "~/.local/bin/ai-status cycle-metric"
+  }
+MANUAL
+    if [ "$ICON_MODE" = "logo" ]; then
+        echo ""
+        echo -e "  ${C_DIM}For the provider logo (with tooltip on hover):${C_RESET}"
+        cat <<'MANUAL'
+  "image#ai-status": {
+    "exec": "~/.local/bin/ai-status logo",
+    "size": 14,
+    "interval": 3,
+    "signal": 11,
+    "on-click": "~/.local/bin/ai-status refresh",
+    "on-click-right": "~/.local/bin/ai-status config",
+    "on-scroll-up": "~/.local/bin/ai-status scroll-up",
+    "on-scroll-down": "~/.local/bin/ai-status scroll-down",
+    "on-click-middle": "~/.local/bin/ai-status cycle-metric",
+    "tooltip": true
+  }
+MANUAL
+    fi
+    echo ""
+    echo -e "  ${C_DIM}Full guide: ${REPO_URL}/blob/main/packages/lib/INSTALL.md${C_RESET}"
 fi
 
 # ═══════════════════════════════════════════════════════════

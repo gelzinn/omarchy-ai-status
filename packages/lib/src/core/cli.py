@@ -132,6 +132,32 @@ def print_logo():
     sys.stdout.write(f"{path}\n{tooltip}")
 
 
+def revert_waybar():
+    """Restore the Waybar config we backed up before configuring it — a clean
+    undo for an automatic setup, in case anything looks off."""
+    import shutil
+    cfg = os.path.expanduser("~/.config/waybar/config.jsonc")
+    bak = cfg + ".ai-status.bak"
+    if not os.path.exists(bak):
+        print("No AI Status backup found — nothing to revert.")
+        print("(A backup is only made when you let the installer configure Waybar for you;")
+        print(" if you added the modules by hand, just remove them yourself.)")
+        return
+    try:
+        if os.path.exists(cfg):
+            shutil.copy2(cfg, cfg + ".pre-revert")  # keep the revert itself undoable
+        shutil.copy2(bak, cfg)
+    except Exception as e:
+        print(f"Could not restore the backup: {e}")
+        sys.exit(1)
+    print(f"Restored your original Waybar config from:\n  {bak}")
+    try:
+        subprocess.run(["pkill", "-SIGUSR2", "waybar"], capture_output=True, timeout=3)
+        print("Reloaded Waybar — the ai-status modules were removed.")
+    except Exception:
+        print("Restart Waybar to apply the change.")
+
+
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "refresh":
         state.trigger_refresh()
@@ -154,6 +180,8 @@ def main():
         cycle_metric()
     elif len(sys.argv) > 1 and sys.argv[1] == "logo":
         print_logo()
+    elif len(sys.argv) > 1 and sys.argv[1] == "revert":
+        revert_waybar()
     else:
-        print("Usage: ai-status [daemon|refresh|config|scroll-up|scroll-down|cycle-metric|logo]")
+        print("Usage: ai-status [daemon|refresh|config|scroll-up|scroll-down|cycle-metric|logo|revert]")
         sys.exit(1)
