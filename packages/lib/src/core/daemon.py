@@ -95,7 +95,8 @@ def run():
     last_config_mtime = 0
     last_selected_mtime = 0
     should_update = True
-    
+    selected = state.load_selected()
+
     while True:
         try:
             now = time.time()
@@ -115,8 +116,11 @@ def run():
             if os.path.exists(state.SELECTED_FILE):
                 selected_mtime = os.path.getmtime(state.SELECTED_FILE)
             
-            selected = state.load_selected()
-            
+            # Only re-parse selected.json when it changed — keeps the fast poll
+            # cheap (the idle hot path is just two getmtime calls).
+            if selected_mtime != last_selected_mtime:
+                selected = state.load_selected()
+
             if should_update and not is_updating:
                 should_update = False
                 is_updating = True
@@ -138,11 +142,17 @@ def run():
                         merged, frame, selected, pending=_pending
                     )
                     print(json.dumps(output, ensure_ascii=False), flush=True)
+                    # Mirror each loading frame onto the logo's tooltip so it
+                    # animates in sync with the text one.
+                    logos.write_tooltip(output.get("tooltip", ""))
+                    logos.signal_waybar()
                     frame += 1
                     time.sleep(0.15)
 
                 output = render.build_final_state(latest_data, selected)
                 print(json.dumps(output, ensure_ascii=False), flush=True)
+                logos.write_tooltip(output.get("tooltip", ""))
+                logos.signal_waybar()
                 last_auto_update = now
                 last_selected_mtime = selected_mtime
 
@@ -153,9 +163,13 @@ def run():
                 last_selected_mtime = selected_mtime
                 output = render.build_final_state(latest_data, selected)
                 print(json.dumps(output, ensure_ascii=False), flush=True)
+                logos.write_tooltip(output.get("tooltip", ""))
                 logos.update_current(selected)
 
-            time.sleep(0.1)
+            # Short poll so the text reacts to a scroll/selection change almost
+            # as fast as the logo (which updates instantly via its signal),
+            # keeping the two in sync. The per-iteration work is tiny.
+            time.sleep(0.02)
             if now - last_auto_update >= 300:
                 should_update = True
                 

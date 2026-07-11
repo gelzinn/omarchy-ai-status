@@ -1,19 +1,19 @@
 """Provider logo handling for the waybar ``image`` module.
 
-Rendering a logo in waybar is surprisingly fragile:
+The image module runs ``ai-status logo``, whose output is ``path\\ntooltip``:
+line 1 is the logo PNG, line 2 is the tooltip (so hovering the logo shows the
+same breakdown as the text). Rendering a logo in waybar is fragile, though:
 
-  * waybar's ``image`` module reads a static file ``path``. Its ``exec`` mode
-    leaves the whole bar blank on some waybar builds, so we never use it —
-    instead we keep a single ``current.png`` up to date and tell waybar to
-    reload it with a real-time signal.
   * gdk-pixbuf on librsvg >= 2.58 ships no SVG loader, so waybar cannot load an
     SVG at all (it throws, uncaught -> std::terminate -> the bar dies).
-  * An image *with an alpha channel* on a layer-shell surface trips a
-    GTK/Wayland compositing bug that renders the entire bar blank.
+  * An image with an alpha channel — or a grayscale PNG — on a layer-shell
+    surface trips a GTK/Wayland compositing bug that blanks the whole bar.
 
-So every logo is rasterised to an opaque, alpha-free PNG flattened onto the
+So every logo is rasterised to an opaque, 24-bit RGB PNG flattened onto the
 bar's background colour, cached per provider, and copied to ``current.png``
-whenever the selected provider changes.
+whenever the selected provider changes. The daemon mirrors the live tooltip
+(loading animation included) into ``tooltip.txt`` and pokes the image module
+with a real-time signal so the logo's tooltip stays in sync with the text.
 """
 
 import os
@@ -21,6 +21,7 @@ import re
 import glob
 import json
 import shutil
+import signal
 import subprocess
 import urllib.request
 
@@ -31,6 +32,10 @@ LOGO_SIGNAL = 11
 
 CACHE_DIR = os.path.expanduser("~/.cache/ai-status/logos")
 CURRENT_PNG = os.path.join(CACHE_DIR, "current.png")
+# The current tooltip, mirrored here by the daemon so the logo module can show
+# it. Newlines are stored as U+2028 (waybar's image tooltip is a single line;
+# Pango still renders the breaks).
+TOOLTIP_FILE = os.path.join(CACHE_DIR, "tooltip.txt")
 
 _PROVIDERS_JSON = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
@@ -62,12 +67,17 @@ def _rasterize_svg(src_path, png_path, height=96):
     """Rasterize an SVG to an opaque, alpha-free PNG. Returns True on success."""
     bg = bar_background_color()
     candidates = []
-    # ImageMagick can both flatten and strip the alpha channel (required).
+    # ImageMagick flattens onto the background and strips the alpha channel.
+    # It must also emit a 24-bit *RGB* PNG (png:color-type=2): a monochrome logo
+    # would otherwise be written as a grayscale PNG, which waybar's image module
+    # fails to render on a layer-shell surface and blanks the whole bar.
     for tool in ("magick", "convert"):
         if shutil.which(tool):
             candidates.append([tool, "-background", bg, "-density", "192",
-                               src_path, "-flatten", "-alpha", "off", "-depth", "8",
-                               "-resize", f"x{height}", png_path])
+                               src_path, "-flatten", "-alpha", "off",
+                               "-type", "TrueColor", "-depth", "8",
+                               "-resize", f"x{height}",
+                               "-define", "png:color-type=2", png_path])
             break
     # rsvg-convert can paint a background but keeps an (opaque) alpha channel,
     # which may still trip the compositing bug — last resort only.
@@ -133,11 +143,53 @@ def provider_png(provider):
     return None
 
 
-def signal_waybar():
-    """Tell waybar to reload the image module (SIGRTMIN+LOGO_SIGNAL)."""
+def write_tooltip(text):
+    """Mirror the current tooltip into TOOLTIP_FILE for the logo module.
+
+    Newlines become U+2028 so waybar keeps it as one line (its image tooltip is
+    single-line) while Pango still renders the breaks. Written atomically so a
+    concurrent ``ai-status logo`` never reads a half-written file.
+    """
     try:
-        subprocess.run(["pkill", f"-RTMIN+{LOGO_SIGNAL}", "waybar"],
-                       capture_output=True, timeout=3)
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        encoded = (text or "").replace("\n", " ")
+        tmp = TOOLTIP_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(encoded)
+        os.replace(tmp, TOOLTIP_FILE)
+    except Exception:
+        pass
+
+
+_waybar_pids = []
+
+
+def signal_waybar():
+    """Poke waybar to reload the image module (SIGRTMIN+LOGO_SIGNAL).
+
+    Uses os.kill with a cached PID (the daemon calls this per loading frame, so
+    spawning pkill each time would be wasteful); re-discovers on failure.
+    """
+    global _waybar_pids
+    sig = signal.SIGRTMIN + LOGO_SIGNAL
+
+    def _send(pids):
+        ok = False
+        for p in pids:
+            try:
+                os.kill(p, sig)
+                ok = True
+            except OSError:
+                pass
+        return ok
+
+    if _waybar_pids and _send(_waybar_pids):
+        return
+    try:
+        out = subprocess.run(["pgrep", "-x", "waybar"], capture_output=True,
+                             text=True, timeout=2)
+        _waybar_pids = [int(x) for x in out.stdout.split()]
+        _send(_waybar_pids)
     except Exception:
         pass
 

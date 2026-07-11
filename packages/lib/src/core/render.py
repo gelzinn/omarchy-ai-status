@@ -18,6 +18,28 @@ BAR_LINE_WIDTH = 34
 
 ICON = "\U000f06a9"
 
+DIM_INACTIVE = 55   # non-selected providers and inactive metrics
+DIM_RESET = 60      # reset lines
+
+
+def _dim(text, alpha):
+    return f"<span alpha='{alpha}%'>{text}</span>"
+
+
+def metric_key(metric):
+    """Stable per-metric id within a provider. Normally just the type, but when
+    a provider exposes two metrics of the same type (e.g. Claude's general vs
+    Fable weekly limit) the label prefix in ``detail`` disambiguates them so
+    each can be selected independently."""
+    t = metric.get("type", "generic")
+    detail = metric.get("detail") or ""
+    if " · " in detail:
+        label = detail.split(" · ", 1)[0].strip()
+        if label:
+            return f"{t}:{label}"
+    return t
+
+
 def _find_selected_provider(latest_data, selected):
     if not selected or not latest_data:
         return None
@@ -41,7 +63,7 @@ def get_selected_metric_text(latest_data, selected, spinner=None):
         return ICON
 
     provider_full_name = p.get("provider", "")
-    metric_type = selected.get("metric", "rolling")
+    selected_key = selected.get("metric", "rolling")
     metrics = p.get("metrics", [])
 
     show_provider = selected.get("show_provider", True)
@@ -63,14 +85,13 @@ def get_selected_metric_text(latest_data, selected, spinner=None):
             
     m = None
     for item in metrics:
-        if item.get("type") == metric_type:
+        if metric_key(item) == selected_key:
             m = item
             break
     if not m and metrics:
         m = metrics[0]
-        metric_type = m.get("type", "rolling")
-        
-    metric_name = TYPE_NAMES.get(metric_type, "Usage")
+
+    metric_name = TYPE_NAMES.get(m.get("type", "generic"), "Usage") if m else "Usage"
 
     if spinner is not None:
         # While loading the percentage isn't known yet — show the spinner in
@@ -179,32 +200,40 @@ def format_provider_block(
         and provider_data.get("_idx") == selected_idx
     )
     prefix = "→ " if is_selected else "  "
-    line = f"{prefix}{provider}"
     if provider_data.get("_error"):
         err_icon = '<span foreground="#ef4444"> ●</span>'
         pad = max(1, BAR_LINE_WIDTH - len(prefix) - len(provider) - 2)
-        line = f"{prefix}{provider}{' ' * pad}{err_icon}"
+        header = f"{prefix}{provider}{' ' * pad}{err_icon}"
+    else:
+        header = f"{prefix}{provider}"
+    # Dim non-selected providers so the selected one stands out (like the replica)
+    if not is_selected:
+        header = _dim(header, DIM_INACTIVE)
     sorted_metrics = sorted(
         metrics, key=lambda m: TYPE_ORDER.get(m.get("type", "generic"), 4)
     )
-    lines = [line, ""]
+    lines = [header, ""]
     for metric in sorted_metrics:
         mtype = metric.get("type", "generic")
         name = TYPE_NAMES.get(mtype, "Usage")
-        is_active = is_selected and mtype == selected_metric
-        pct = float(metric.get("percentage", 0.0))
+        is_active = is_selected and metric_key(metric) == selected_metric
         seconds = metric.get("reset_in_seconds")
         detail = metric.get("detail")
         if detail is None:
             detail = format_reset_time(seconds, mtype)
 
-        if is_active:
-            lines.append(f"•   {name}:")
-        else:
-            lines.append(f"    {name}:")
-        lines.append(f"    {make_progress_bar(pct)}")
+        # Only the active metric of the selected provider stays bright.
+        recede = None if is_active else DIM_INACTIVE
+        label = f"•   {name}:" if is_active else f"    {name}:"
+        if recede:
+            label = _dim(label, recede)
+        bar_str = make_progress_bar(float(metric.get("percentage", 0.0)))
+        bar_line = ("    " + _dim(bar_str, recede)) if recede else f"    {bar_str}"
+
+        lines.append(label)
+        lines.append(bar_line)
         if detail:
-            lines.append(f"    {detail}")
+            lines.append("    " + _dim(detail, recede if recede else DIM_RESET))
         lines.append("")
     return "\n".join(lines)
 
@@ -226,32 +255,36 @@ def format_loading_provider_block(
     )
     prefix = "→ " if is_selected else "  "
     spinner = SPINNERS[frame_index % len(SPINNERS)]
-    line = f"{prefix}{provider}"
     if provider_data.get("_error"):
         err_icon = '<span foreground="#ef4444"> ●</span>'
         pad = max(1, BAR_LINE_WIDTH - len(prefix) - len(provider) - 2)
-        line = f"{prefix}{provider}{' ' * pad}{err_icon}"
+        header = f"{prefix}{provider}{' ' * pad}{err_icon}"
+    else:
+        header = f"{prefix}{provider}"
+    if not is_selected:
+        header = _dim(header, DIM_INACTIVE)
 
     sorted_metrics = sorted(
         metrics, key=lambda m: TYPE_ORDER.get(m.get("type", "generic"), 4)
     )
-    lines = [line, ""]
+    lines = [header, ""]
     for metric in sorted_metrics:
         mtype = metric.get("type", "generic")
         name = TYPE_NAMES.get(mtype, "Usage")
-        is_active = is_selected and mtype == selected_metric
+        is_active = is_selected and metric_key(metric) == selected_metric
         seconds = metric.get("reset_in_seconds")
         detail = metric.get("detail")
         if detail is None:
             detail = format_reset_time(seconds, mtype)
 
-        if is_active:
-            lines.append(f"•   {name}:")
-        else:
-            lines.append(f"    {name}:")
+        recede = None if is_active else DIM_INACTIVE
+        label = f"•   {name}:" if is_active else f"    {name}:"
+        if recede:
+            label = _dim(label, recede)
+        lines.append(label)
         lines.append(f"    {make_shimmer_bar(frame_index, spinner)}")
         if detail:
-            lines.append(f"    {detail}")
+            lines.append("    " + _dim(detail, recede if recede else DIM_RESET))
         lines.append("")
     return "\n".join(lines)
 
