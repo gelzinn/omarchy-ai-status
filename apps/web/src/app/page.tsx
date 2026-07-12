@@ -298,13 +298,6 @@ export default async function Homepage() {
               </a>
             </div>
 
-            <Link
-              href="/providers"
-              className="inline-flex items-center gap-1 text-sm font-medium text-foreground hover:text-muted-foreground transition-colors w-fit mt-1"
-            >
-              View supported providers <ArrowRight className="size-3.5" />
-            </Link>
-
             <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/10 bg-emerald-500/10 p-4 text-sm text-emerald-500">
               <ShieldCheck className="mt-0.5 size-5 shrink-0" />
 
@@ -312,6 +305,13 @@ export default async function Homepage() {
     						Your credentials never leave your machine.
     					</p>
             </div>
+
+            <Link
+              href="/providers"
+              className="inline-flex items-center gap-1 text-sm font-medium text-foreground hover:text-muted-foreground transition-colors w-fit mt-1"
+            >
+              View supported providers <ArrowRight className="size-3.5" />
+            </Link>
           </section>
         </div>
 

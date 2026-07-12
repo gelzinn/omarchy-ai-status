@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { GithubIcon } from "@/components/github-icon";
 import { Logo } from "@/components/logo";
 import { site, repo } from "@/lib/env";
@@ -18,10 +19,10 @@ export async function Header() {
 
 	return (
 		<header className="flex items-center justify-between">
-			<span className="flex items-center gap-2 font-mono text-sm font-medium">
+			<Link href="/" className="flex items-center gap-2 font-mono text-sm font-medium transition-colors hover:text-muted-foreground">
 				<Logo className="size-5" />
 				{site.name}
-			</span>
+			</Link>
 			<a
 				href={repo.url}
 				target="_blank"
