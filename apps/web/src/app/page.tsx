@@ -7,10 +7,10 @@ import { HighlightedCodeBlock } from "@/components/code-highlight";
 import { FeatureVisuals } from "@/components/features-visuals";
 import { WaybarReplica } from "@/components/waybar-replica";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Plus, ShieldCheck } from "lucide-react";
 
 import { SUPPORTED_PROVIDERS } from "@ai-status/shared";
-import { repo } from "@/lib/env";
+import { site, repo, LIB_NAME } from "@/lib/env";
 import {
   WAYBAR_CUSTOM_MODULE,
   WAYBAR_LOGO_MODULE,
@@ -28,12 +28,15 @@ export default async function Homepage() {
 
     if (res.ok) {
       const data = await res.json();
+
       if (data.tag_name) {
         latestVersion = data.tag_name;
 
         const parts = data.tag_name.split(".");
+
         if (parts.length > 0) {
           const last = parseInt(parts[parts.length - 1]);
+
           if (!isNaN(last) && last > 0) {
             parts[parts.length - 1] = (last - 1).toString();
             oldVersion = parts.join(".");
@@ -51,7 +54,7 @@ export default async function Homepage() {
     <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:gap-16 p-6 sm:py-16">
       <Header />
 
-      <main className="grid items-start gap-10 mt-8 lg:mt-16 lg:grid-cols-2 lg:gap-16">
+      <main className="grid items-start gap-10 mt-8 lg:mt-0 lg:grid-cols-2 lg:gap-16">
         <div className="flex min-w-0 flex-col gap-16 md:gap-32 lg:gap-48 lg:pb-32 relative z-10">
           <Hero />
 
@@ -65,11 +68,13 @@ export default async function Homepage() {
                 bar shows the usage percentage of the active provider.
               </p>
             </div>
+
             <HighlightedCodeBlock
               code={WAYBAR_CUSTOM_MODULE}
               lang="json"
               label="~/.config/waybar/config.jsonc"
             />
+
             <p className="text-sm text-muted-foreground">
               To also show the active provider's logo — and get the same
               breakdown when you hover it — add the image module. The one-command
@@ -77,7 +82,11 @@ export default async function Homepage() {
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
                 --icon-mode logo
               </code>{" "}
-              sets this up for you. To do it by hand: the{" "}
+              sets this up for you.
+            </p>
+
+            <p className="text-sm text-muted-foreground">
+              To do it by hand: the{" "}
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
                 exec
               </code>{" "}
@@ -97,19 +106,21 @@ export default async function Homepage() {
               </code>
               ):
             </p>
+
             <HighlightedCodeBlock
               code={WAYBAR_LOGO_MODULE}
               lang="json"
               label="~/.config/waybar/config.jsonc"
             />
+
             <p className="text-sm text-muted-foreground">
               Then, include both{" "}
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
-                "image#ai-status"
+                {`"image#${LIB_NAME}"`}
               </code>{" "}
               and{" "}
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
-                "custom/ai-status"
+                {`"custom/${LIB_NAME}"`}
               </code>{" "}
               in your preferred layout section (e.g.{" "}
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
@@ -117,20 +128,23 @@ export default async function Homepage() {
               </code>
               ):
             </p>
+
             <CodeBlock
               code={WAYBAR_LAYOUT}
               label="~/.config/waybar/config.jsonc"
             >
+              <pre>
+                <code>
               <span className="text-muted-foreground/40">{"{\n"}</span>
               <span className="text-muted-foreground/30">{"    // ...\n"}</span>
               <span className="text-muted-foreground/40">
                 {'    "modules-right": [\n'}
               </span>
               {"        "}
-              <span className="text-[#ffcfa3]">"image#ai-status"</span>
+              <span className="text-[#ffcfa3]">{`"image#${LIB_NAME}"`}</span>
               <span className="text-muted-foreground/40">{",\n"}</span>
               {"        "}
-              <span className="text-[#ffcfa3]">"custom/ai-status"</span>
+              <span className="text-[#ffcfa3]">{`"custom/${LIB_NAME}"`}</span>
               <span className="text-muted-foreground/40">{",\n"}</span>
               <span className="text-muted-foreground/40">
                 {'        "network",\n'}
@@ -150,6 +164,8 @@ export default async function Homepage() {
               <span className="text-muted-foreground/40">{"    ],\n"}</span>
               <span className="text-muted-foreground/30">{"    // ...\n"}</span>
               <span className="text-muted-foreground/40">{"}"}</span>
+                </code>
+              </pre>
             </CodeBlock>
 
             <Link
@@ -252,38 +268,62 @@ export default async function Homepage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="grid gap-3 sm:grid-cols-2">
               {SUPPORTED_PROVIDERS.map((provider) => (
-                <div
-                  key={provider.name}
-                  className="group flex cursor-default items-center gap-2 rounded-full bg-card border border-border px-4 py-2 shadow-sm backdrop-blur-md transition-all hover:border-border hover:bg-card/80 hover:shadow-md"
+                <Link
+                  key={provider.slug}
+                  href={`/providers/${provider.slug}`}
+                  className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-foreground/20"
                 >
-                  <img
-                    src={provider.logo}
-                    alt={provider.name}
-                    className="h-5 w-5 rounded-sm"
-                  />
-
-                  <span className="font-heading text-base font-medium text-foreground/80 transition-colors group-hover:text-foreground">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
+                    <img
+                      src={provider.logo}
+                      alt={provider.name}
+                      className="size-5 rounded-sm object-contain"
+                    />
+                  </div>
+                  <span className="font-heading text-sm font-semibold text-foreground">
                     {provider.name}
                   </span>
-                </div>
+                  <ArrowUpRight className="ml-auto size-4 text-muted-foreground/40 transition-colors group-hover:text-foreground" />
+                </Link>
               ))}
 
               <a
                 target="_blank"
                 rel="noreferrer"
                 href={`${repo.url}/issues/new`}
-                className="group flex items-center gap-2 rounded-full border border-dashed border-border bg-card px-4 py-2 transition-all text-muted-foreground/50"
+                className="group flex items-center gap-3 rounded-2xl border border-dashed border-border bg-card p-3 text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:text-foreground"
               >
-                <span className="flex size-5 items-center justify-center rounded-sm transition-colors group-hover:text-foreground">
-                  +
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
+                  <Plus className="size-4" />
+                </div>
+                <span className="font-heading text-sm font-semibold">
+                  Add a provider
                 </span>
-
-                <span className="font-heading text-base font-medium transition-colors group-hover:text-foreground">
-                  Add provider
-                </span>
+                <ArrowUpRight className="ml-auto size-4 text-muted-foreground/40 transition-colors group-hover:text-foreground" />
               </a>
+            </div>
+
+            <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-sm">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="mt-0.5 size-5 shrink-0 text-foreground/70" />
+                <p className="text-pretty leading-relaxed text-muted-foreground">
+                  <span className="font-medium text-foreground">
+                    Your credentials never leave your machine.
+                  </span>{" "}
+                  {site.name} reads tokens from your local auth files and talks
+                  straight to each provider — no server, no telemetry.
+                </p>
+              </div>
+
+              <Link
+                href="/security"
+                className="inline-flex w-fit items-center gap-1 pl-8 text-sm font-medium text-foreground transition-colors hover:text-muted-foreground"
+              >
+                How {site.name} handles your credentials
+                <ArrowRight className="size-3.5" />
+              </Link>
             </div>
 
             <Link

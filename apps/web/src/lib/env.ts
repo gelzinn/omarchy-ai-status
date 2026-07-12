@@ -1,7 +1,16 @@
-const SITE_ORIGIN = "https://ai-status.gelzin.com";
+/**
+ * The library / command / repo name. Rename the whole project by changing this
+ * ONE constant — it flows into the domain, the GitHub slug, every `ai-status …`
+ * command shown on the site, and the rendered provider guides (renderMarkdown
+ * swaps the literal for this). `site.name` ("AI Status") is the product's
+ * display name and is intentionally separate.
+ */
+export const LIB_NAME = "ai-status";
+
+const SITE_ORIGIN = `https://${LIB_NAME}.gelzin.com`;
 // owner/repo — GitHub exposes it from three hosts (github.com, api.github.com,
 // raw.githubusercontent.com), so the slug is the piece worth reusing.
-const REPO_SLUG = "gelzinn/ai-status";
+const REPO_SLUG = `gelzinn/${LIB_NAME}`;
 
 /** The public website. */
 export const site = {
@@ -15,6 +24,8 @@ export const site = {
 /** The GitHub repository. */
 export const repo = {
 	url: `https://github.com/${REPO_SLUG}`,
+	/** The repo's GitHub API endpoint (stars, metadata). */
+	apiRepo: `https://api.github.com/repos/${REPO_SLUG}`,
 	/** Latest-release endpoint used to show the current version. */
 	apiUrl: `https://api.github.com/repos/${REPO_SLUG}/releases/latest`,
 	/** Canonical raw URL for install.sh (mirrored by site.installUrl). */
