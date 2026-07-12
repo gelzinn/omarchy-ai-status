@@ -2,6 +2,7 @@ import Link from "next/link";
 import { GithubIcon } from "@/components/github-icon";
 import { Logo } from "@/components/logo";
 import { site, repo } from "@/lib/env";
+import { cn } from "@/lib/utils";
 
 export async function Header() {
 	let stars = null;
@@ -27,7 +28,10 @@ export async function Header() {
 				href={repo.url}
 				target="_blank"
 				rel="noreferrer"
-				className="flex items-center gap-2 rounded-full bg-white pl-4 pr-1.5 py-1.5 text-sm font-medium text-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-white/90"
+				className={cn(
+					"flex items-center gap-2 rounded-full bg-white pl-4 py-1.5 text-sm font-medium text-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-white/90",
+					stars !== null ? "pr-1.5" : "pr-4",
+				)}
 			>
 				<GithubIcon className="-ml-1 size-4" />
 				<span className="hidden sm:inline">Star on GitHub</span>
