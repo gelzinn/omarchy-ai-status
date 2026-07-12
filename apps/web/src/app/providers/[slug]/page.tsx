@@ -16,7 +16,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { GithubIcon } from "@/components/github-icon";
 import { SUPPORTED_PROVIDERS, type Provider } from "@ai-status/shared";
-import { site, repo } from "@/lib/env";
+import { site, repo, LIB_NAME } from "@/lib/env";
 import { renderMarkdown } from "@/lib/markdown";
 
 function getProvider(slug: string): Provider | undefined {
@@ -51,7 +51,7 @@ export async function generateMetadata({
 	if (!provider) return { title: `Provider not found | ${site.name}` };
 	return {
 		title: `${provider.name} | ${site.name}`,
-		description: `How to authenticate ${provider.name} in your Waybar with ai-status — ${provider.tracks}.`,
+		description: `How to authenticate ${provider.name} in your Waybar with ${LIB_NAME} — ${provider.tracks}.`,
 	};
 }
 
@@ -110,9 +110,9 @@ export default async function ProviderPage({
 						<div className="flex shrink-0 flex-col gap-2.5 sm:flex-row sm:items-center">
 							<Link
 								href="/"
-								className="flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
+								className="flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-white/90"
 							>
-								<Terminal className="size-4" />
+								<Terminal className="-ml-1 size-4" />
 								Install {site.name}
               </Link>
 
@@ -120,9 +120,9 @@ export default async function ProviderPage({
 								href={sourceUrl(slug)}
 								target="_blank"
 								rel="noreferrer"
-								className="flex items-center justify-center gap-2 rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
+								className="flex items-center justify-center gap-2 rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-muted"
 							>
-								<GithubIcon className="size-4" />
+								<GithubIcon className="-ml-1 size-4" />
 								View source
 							</a>
 						</div>
@@ -247,9 +247,9 @@ export default async function ProviderPage({
 							<Link
 								key={p.slug}
 								href={`/providers/${p.slug}`}
-								className="group flex items-center gap-3 rounded-xl border border-border bg-card/40 p-3 transition-all hover:-translate-y-0.5 hover:bg-card"
+								className="group flex items-center gap-3 rounded-2xl border border-border bg-card/40 p-3 transition-all hover:-translate-y-0.5 hover:bg-card"
 							>
-								<div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background">
+								<div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
 									<img
 										src={p.logo}
 										alt={p.name}

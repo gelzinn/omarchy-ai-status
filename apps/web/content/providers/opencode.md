@@ -1,4 +1,4 @@
-OpenCode's usage dashboard has no public API, so ai-status reads your quota the same way your browser does — by replaying an authenticated request to `opencode.ai`. You provide two things from a logged-in session: your **workspace ID** and a **session cookie**. It's more hands-on than the OAuth providers, but it's a one-time setup.
+OpenCode's usage dashboard has no public API, so AI Status reads your quota the same way your browser does — by replaying an authenticated request to `opencode.ai`. You provide two things from a logged-in session: your **workspace ID** and a **session cookie**. It's more hands-on than the OAuth providers, but it's a one-time setup.
 
 > Because this relies on a session cookie, it can stop working when you log out or the cookie expires. If OpenCode goes stale, redo **Step 2** to refresh the cookie.
 
@@ -6,7 +6,7 @@ OpenCode's usage dashboard has no public API, so ai-status reads your quota the 
 
 - An OpenCode account you can log into at [opencode.ai](https://opencode.ai)
 - A browser with DevTools (any Chromium- or Firefox-based one)
-- `python3`, `curl` and `jq` (already required by ai-status)
+- `python3`, `curl` and `jq` (already required by AI Status)
 
 ## Step 1 — Find your workspace ID
 
@@ -29,7 +29,7 @@ The segment after `/workspace/` — `ws_a1b2c3d4` above — is your **workspace 
 
 ## Step 3 — Create the config file
 
-ai-status reads both values from `~/.config/opencode-bar/opencode-go.json`:
+AI Status reads both values from `~/.config/opencode-bar/opencode-go.json`:
 
 ```bash
 mkdir -p ~/.config/opencode-bar
@@ -44,9 +44,9 @@ chmod 600 ~/.config/opencode-bar/opencode-go.json
 
 `chmod 600` keeps the file readable only by your user.
 
-## Step 4 — Enable it in ai-status
+## Step 4 — Enable it in AI Status
 
-Right-click the ai-status module to open the config TUI, make sure **OpenCode** is enabled, then left-click to refresh. Within a few seconds you'll see OpenCode's usage in the tooltip.
+Right-click the AI Status module to open the config TUI, make sure **OpenCode** is enabled, then left-click to refresh. Within a few seconds you'll see OpenCode's usage in the tooltip.
 
 ## Troubleshooting
 

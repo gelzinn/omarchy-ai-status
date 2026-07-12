@@ -6,7 +6,7 @@ import { site, repo } from "@/lib/env";
 export async function Header() {
 	let stars = null;
 	try {
-		const res = await fetch("https://api.github.com/repos/gelzinn/ai-status", {
+		const res = await fetch(repo.apiRepo, {
 			next: { revalidate: 3600 },
 		});
 		if (res.ok) {

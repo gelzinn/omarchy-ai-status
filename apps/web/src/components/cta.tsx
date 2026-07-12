@@ -71,14 +71,14 @@ export function Cta() {
 						href={repo.url}
 						target="_blank"
 						rel="noreferrer"
-						className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-8 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/90 sm:w-auto"
+						className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90 sm:w-auto"
 					>
 						<GithubIcon className="size-4" />
 						Star on GitHub
 					</a>
 					<Link
 						href="/providers"
-						className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-8 py-3 text-sm font-semibold transition-colors hover:bg-muted sm:w-auto"
+						className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
 					>
 						View Providers
 						<ArrowRight className="size-4" />

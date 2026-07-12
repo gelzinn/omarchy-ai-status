@@ -10,7 +10,7 @@ import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
 import { SUPPORTED_PROVIDERS } from "@ai-status/shared";
-import { site, repo } from "@/lib/env";
+import { site, repo, LIB_NAME } from "@/lib/env";
 import {
   WAYBAR_CUSTOM_MODULE,
   WAYBAR_LOGO_MODULE,
@@ -116,11 +116,11 @@ export default async function Homepage() {
             <p className="text-sm text-muted-foreground">
               Then, include both{" "}
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
-                "image#ai-status"
+                {`"image#${LIB_NAME}"`}
               </code>{" "}
               and{" "}
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
-                "custom/ai-status"
+                {`"custom/${LIB_NAME}"`}
               </code>{" "}
               in your preferred layout section (e.g.{" "}
               <code className="bg-secondary/50 px-1.5 py-0.5 rounded-md text-foreground font-mono">
@@ -141,10 +141,10 @@ export default async function Homepage() {
                 {'    "modules-right": [\n'}
               </span>
               {"        "}
-              <span className="text-[#ffcfa3]">"image#ai-status"</span>
+              <span className="text-[#ffcfa3]">{`"image#${LIB_NAME}"`}</span>
               <span className="text-muted-foreground/40">{",\n"}</span>
               {"        "}
-              <span className="text-[#ffcfa3]">"custom/ai-status"</span>
+              <span className="text-[#ffcfa3]">{`"custom/${LIB_NAME}"`}</span>
               <span className="text-muted-foreground/40">{",\n"}</span>
               <span className="text-muted-foreground/40">
                 {'        "network",\n'}
@@ -303,12 +303,14 @@ export default async function Homepage() {
               </a>
             </div>
 
-            <div className="flex items-start gap-4 rounded-2xl border border-emerald-500/10 bg-emerald-500/10 p-4 text-sm">
-              <ShieldCheck className="mt-0.5 size-5 shrink-0 text-emerald-500" />
-              <p className="text-emerald-500 text-pretty">
-                Your credentials never leave your machine. {site.name} reads
-                tokens directly from your local auth files — nothing is proxied
-                through us.
+            <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/40 p-4 text-sm">
+              <ShieldCheck className="mt-0.5 size-5 shrink-0 text-foreground/70" />
+              <p className="text-pretty leading-relaxed text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  Your credentials never leave your machine.
+                </span>{" "}
+                {site.name} reads tokens directly from your local auth files —
+                nothing is proxied through us.
               </p>
             </div>
 

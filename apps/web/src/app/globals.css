@@ -3,33 +3,65 @@
 
 @utility scroll-fade-x {
 	--scroll-fade-distance: 64px;
+	/* Height reserved at the bottom (e.g. for a scrollbar) that stays unfaded.
+	   Set to 0px on strips that hide their scrollbar to fade the full height. */
+	--scroll-fade-band: 16px;
 }
 
 .scroll-fade-x[data-scroll="start"] {
-	mask-image: 
+	mask-image:
 		linear-gradient(to right, black, black calc(100% - var(--scroll-fade-distance)), transparent),
 		linear-gradient(black, black);
-	mask-size: 100% calc(100% - 16px), 100% 16px;
+	mask-size: 100% calc(100% - var(--scroll-fade-band)), 100% var(--scroll-fade-band);
 	mask-position: top, bottom;
 	mask-repeat: no-repeat;
 }
 
 .scroll-fade-x[data-scroll="end"] {
-	mask-image: 
+	mask-image:
 		linear-gradient(to right, transparent, black var(--scroll-fade-distance), black),
 		linear-gradient(black, black);
-	mask-size: 100% calc(100% - 16px), 100% 16px;
+	mask-size: 100% calc(100% - var(--scroll-fade-band)), 100% var(--scroll-fade-band);
 	mask-position: top, bottom;
 	mask-repeat: no-repeat;
 }
 
 .scroll-fade-x[data-scroll="middle"] {
-	mask-image: 
+	mask-image:
 		linear-gradient(to right, transparent, black var(--scroll-fade-distance), black calc(100% - var(--scroll-fade-distance)), transparent),
 		linear-gradient(black, black);
-	mask-size: 100% calc(100% - 16px), 100% 16px;
+	mask-size: 100% calc(100% - var(--scroll-fade-band)), 100% var(--scroll-fade-band);
 	mask-position: top, bottom;
 	mask-repeat: no-repeat;
+}
+
+/* Live edge fade: each side is either off (0) or full width when that side has
+   room to scroll. Registering the vars with @property makes them animatable, so
+   the transition eases the fade in/out instead of popping — while keeping both
+   sides the same size. JS sets --fade-left / --fade-right in px.
+   Full height — for strips that hide their scrollbar. */
+@property --fade-left {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+@property --fade-right {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+@utility scroll-fade-x-live {
+	--fade-left: 0px;
+	--fade-right: 0px;
+	mask-image: linear-gradient(
+		to right,
+		transparent,
+		black var(--fade-left),
+		black calc(100% - var(--fade-right)),
+		transparent
+	);
+	mask-repeat: no-repeat;
+	transition: --fade-left 0.45s ease, --fade-right 0.45s ease;
 }
 
 /* shadcn-style tokens, neutral base, dark via prefers-color-scheme */

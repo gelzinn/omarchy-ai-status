@@ -8,6 +8,7 @@ import rehypeShiki from "@shikijs/rehype";
 import rehypeReact from "rehype-react";
 import type { Components } from "hast-util-to-jsx-runtime";
 import { CODE_THEME } from "./highlight";
+import { LIB_NAME, site } from "./env";
 import { CodeBlock } from "@/components/code-block";
 
 /** Concatenate a hast node's text — the raw code, for the copy button. */
@@ -87,7 +88,11 @@ export async function renderMarkdown(md: string): Promise<ReactNode> {
 		.use(remarkRehype)
 		.use(rehypeShiki, { theme: CODE_THEME, addLanguageClass: true })
 		.use(rehypeReact, { Fragment, jsx, jsxs, components, passNode: true })
-		.process(md);
+		// Guides are authored with the literal names; swap the product name
+		// ("AI Status") for site.name and the command/path ("ai-status") for
+		// LIB_NAME, so a rename flows through the docs too. (No-op while equal;
+		// the two casings never overlap.)
+		.process(md.replaceAll("AI Status", site.name).replaceAll("ai-status", LIB_NAME));
 
 	return file.result;
 }
