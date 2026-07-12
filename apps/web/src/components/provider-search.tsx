@@ -72,7 +72,7 @@ function PeriodDropdown({
 					"flex items-center gap-2 pl-4 pr-3 font-medium",
 					active
 						? "border-transparent bg-foreground text-background"
-						: "border-border bg-card/50 text-muted-foreground hover:bg-card hover:text-foreground",
+						: "border-border bg-card text-muted-foreground hover:bg-card hover:text-foreground",
 				)}
 			>
 				{current.label}
@@ -177,7 +177,7 @@ export function ProviderSearch({ providers }: { providers: Provider[] }) {
 							aria-label="Search providers"
 							className={cn(
 								CONTROL,
-								"w-full border-border bg-card/50 pl-10 pr-4 text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-foreground/30 focus:bg-card",
+								"w-full border-border bg-card pl-10 pr-4 text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-foreground/30 focus:bg-card",
 							)}
 						/>
 					</div>
@@ -210,7 +210,7 @@ export function ProviderSearch({ providers }: { providers: Provider[] }) {
 									"shrink-0 px-4 font-medium",
 									authFilter === f.id
 										? "border-transparent bg-foreground text-background"
-										: "border-border bg-card/50 text-muted-foreground hover:bg-card hover:text-foreground",
+										: "border-border bg-card text-muted-foreground hover:bg-card hover:text-foreground",
 								)}
 							>
 								{f.label}
@@ -228,7 +228,7 @@ export function ProviderSearch({ providers }: { providers: Provider[] }) {
 					<Link
 						key={provider.name}
 						href={`/providers/${provider.slug}`}
-						className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card/50 shadow-sm backdrop-blur-md transition-transform hover:-translate-y-0.5 hover:bg-card hover:shadow-md"
+						className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm backdrop-blur-md transition-transform hover:-translate-y-0.5 hover:bg-card hover:shadow-md"
 					>
 						<div className="flex flex-col gap-4 p-4">
 							<header className="flex items-center gap-3">

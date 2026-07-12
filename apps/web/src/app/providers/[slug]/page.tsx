@@ -88,7 +88,7 @@ export default async function ProviderPage({
 				</nav>
 
 				{/* Hero */}
-				<section className="relative overflow-hidden rounded-3xl border border-border bg-card/40 p-4">
+				<section className="relative overflow-hidden rounded-3xl border border-border bg-card p-4">
 					<div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_80%_at_30%_0%,#000_20%,transparent_100%)] opacity-30" />
 					<div className="pointer-events-none absolute -top-24 left-1/4 h-64 w-full max-w-md -translate-x-1/2 rounded-full bg-foreground/5 blur-[100px]" />
 
@@ -139,7 +139,7 @@ export default async function ProviderPage({
 						{guide ? (
 							<div className="md-guide">{guide}</div>
 						) : (
-							<div className="flex flex-col gap-4 rounded-2xl border border-dashed border-border bg-card/30 p-6 text-sm leading-relaxed text-muted-foreground">
+							<div className="flex flex-col gap-4 rounded-2xl border border-dashed border-border bg-card p-6 text-sm leading-relaxed text-muted-foreground">
 								<p>
 									A step-by-step guide for {provider.name} is coming soon. In the
 									meantime, {site.name} reads its credentials from{" "}
@@ -247,7 +247,7 @@ export default async function ProviderPage({
 							<Link
 								key={p.slug}
 								href={`/providers/${p.slug}`}
-								className="group flex items-center gap-3 rounded-2xl border border-border bg-card/40 p-3 transition-all hover:-translate-y-0.5 hover:bg-card"
+								className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:bg-card"
 							>
 								<div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
 									<img

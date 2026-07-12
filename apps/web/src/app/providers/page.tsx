@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SUPPORTED_PROVIDERS } from "@ai-status/shared";
 import { site, LIB_NAME } from "@/lib/env";
-import { ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { ProviderSearch } from "@/components/provider-search";
 import type { Metadata } from "next";
 
@@ -32,25 +33,26 @@ export default function ProvidersPage() {
 				<ProviderSearch providers={SUPPORTED_PROVIDERS} />
 
 				{/* Security note */}
-				<section className="flex items-start gap-3 rounded-2xl border border-border bg-card/40 p-4 text-sm">
-					<ShieldCheck className="mt-0.5 size-5 shrink-0 text-foreground/70" />
-
-					<div className="flex flex-col gap-2 leading-relaxed">
-						<span className="font-medium text-foreground">
-							Your credentials never leave your machine.
-						</span>
-
-						<div className="text-muted-foreground">
-							<p>
-								{site.name} ships zero API keys. Every provider reads its tokens
-								directly from the auth files you already keep on disk — OAuth
-								sessions, config files, cookies. Your machine talks straight to
-								each provider's API. Nothing passes through us. No telemetry, no
-								cloud proxy, no remote storage. Credentials live and die on your
-								machine.
-							</p>
-						</div>
+				<section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-sm">
+					<div className="flex items-start gap-3">
+						<ShieldCheck className="mt-0.5 size-5 shrink-0 text-foreground/70" />
+						<p className="leading-relaxed text-muted-foreground">
+							<span className="font-medium text-foreground">
+								Your credentials never leave your machine.
+							</span>{" "}
+							{site.name} ships zero API keys — it reads tokens from your local
+							auth files and talks straight to each provider. No server, no
+							telemetry, no storage.
+						</p>
 					</div>
+
+					<Link
+						href="/security"
+						className="inline-flex w-fit items-center gap-1 pl-8 text-sm font-medium text-foreground transition-colors hover:text-muted-foreground"
+					>
+						How {site.name} handles your credentials
+						<ArrowRight className="size-3.5" />
+					</Link>
 				</section>
 			</main>
 

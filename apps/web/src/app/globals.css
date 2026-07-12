@@ -171,3 +171,15 @@ body {
 	border: 3px solid transparent;
 	background-clip: padding-box;
 }
+
+/* Security page — "Every outbound connection" diagram: the machine's glow ring
+   pulses softly (the traveling packets themselves are animated via SVG). */
+@keyframes outbound-glow {
+	0%,
+	100% {
+		opacity: 0.12;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}

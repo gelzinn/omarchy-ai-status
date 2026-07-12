@@ -7,7 +7,7 @@ import { HighlightedCodeBlock } from "@/components/code-highlight";
 import { FeatureVisuals } from "@/components/features-visuals";
 import { WaybarReplica } from "@/components/waybar-replica";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Plus, ShieldCheck } from "lucide-react";
 
 import { SUPPORTED_PROVIDERS } from "@ai-status/shared";
 import { site, repo, LIB_NAME } from "@/lib/env";
@@ -268,50 +268,62 @@ export default async function Homepage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="grid gap-3 sm:grid-cols-2">
               {SUPPORTED_PROVIDERS.map((provider) => (
-                <a
-                  key={provider.name}
-                  href={`${repo.url}/tree/main/packages/lib/src/providers/${provider.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group flex cursor-default items-center gap-2 rounded-full bg-card border border-border px-4 py-2 shadow-sm backdrop-blur-md transition-all hover:border-border hover:bg-card/80 hover:shadow-md"
+                <Link
+                  key={provider.slug}
+                  href={`/providers/${provider.slug}`}
+                  className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-foreground/20"
                 >
-                  <img
-                    src={provider.logo}
-                    alt={provider.name}
-                    className="h-5 w-5 rounded-sm"
-                  />
-                  <span className="font-heading text-base font-medium text-foreground/80 transition-colors group-hover:text-foreground">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
+                    <img
+                      src={provider.logo}
+                      alt={provider.name}
+                      className="size-5 rounded-sm object-contain"
+                    />
+                  </div>
+                  <span className="font-heading text-sm font-semibold text-foreground">
                     {provider.name}
                   </span>
-                </a>
+                  <ArrowUpRight className="ml-auto size-4 text-muted-foreground/40 transition-colors group-hover:text-foreground" />
+                </Link>
               ))}
 
               <a
                 target="_blank"
                 rel="noreferrer"
                 href={`${repo.url}/issues/new`}
-                className="group flex items-center gap-2 rounded-full border border-dashed border-border bg-card px-4 py-2 transition-all text-muted-foreground/50"
+                className="group flex items-center gap-3 rounded-2xl border border-dashed border-border bg-card p-3 text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:text-foreground"
               >
-                <span className="flex size-5 items-center justify-center rounded-sm transition-colors group-hover:text-foreground">
-                  +
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
+                  <Plus className="size-4" />
+                </div>
+                <span className="font-heading text-sm font-semibold">
+                  Add a provider
                 </span>
-                <span className="font-heading text-base font-medium transition-colors group-hover:text-foreground">
-                  Add provider
-                </span>
+                <ArrowUpRight className="ml-auto size-4 text-muted-foreground/40 transition-colors group-hover:text-foreground" />
               </a>
             </div>
 
-            <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/40 p-4 text-sm">
-              <ShieldCheck className="mt-0.5 size-5 shrink-0 text-foreground/70" />
-              <p className="text-pretty leading-relaxed text-muted-foreground">
-                <span className="font-medium text-foreground">
-                  Your credentials never leave your machine.
-                </span>{" "}
-                {site.name} reads tokens directly from your local auth files —
-                nothing is proxied through us.
-              </p>
+            <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-sm">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="mt-0.5 size-5 shrink-0 text-foreground/70" />
+                <p className="text-pretty leading-relaxed text-muted-foreground">
+                  <span className="font-medium text-foreground">
+                    Your credentials never leave your machine.
+                  </span>{" "}
+                  {site.name} reads tokens from your local auth files and talks
+                  straight to each provider — no server, no telemetry.
+                </p>
+              </div>
+
+              <Link
+                href="/security"
+                className="inline-flex w-fit items-center gap-1 pl-8 text-sm font-medium text-foreground transition-colors hover:text-muted-foreground"
+              >
+                How {site.name} handles your credentials
+                <ArrowRight className="size-3.5" />
+              </Link>
             </div>
 
             <Link
