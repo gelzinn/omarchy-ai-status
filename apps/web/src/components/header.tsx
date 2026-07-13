@@ -4,19 +4,40 @@ import { Logo } from "@/components/logo";
 import { site, repo } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
-export async function Header() {
-	let stars = null;
+// Last count we read successfully — reused when a later request fails (rate
+// limit / transient error) so the badge doesn't disappear once it has shown.
+let cachedStars: number | null = null;
+
+async function getStarCount(): Promise<number | null> {
 	try {
 		const res = await fetch(repo.apiRepo, {
-			next: { revalidate: 3600 },
+			headers: {
+				// GitHub returns 403 for API requests without a User-Agent.
+				"User-Agent": site.name,
+				Accept: "application/vnd.github+json",
+				// Use a token if one is configured (60/h → 5000/h).
+				...(process.env.GITHUB_TOKEN
+					? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+					: {}),
+			},
+			// Fetch at most every 6h — one request every few hours stays well
+			// under the 60/h anonymous limit, and the value is cached in between.
+			next: { revalidate: 21600 },
 		});
 		if (res.ok) {
 			const data = await res.json();
-			stars = data.stargazers_count;
+			if (typeof data.stargazers_count === "number") {
+				cachedStars = data.stargazers_count;
+			}
 		}
 	} catch (error) {
 		console.error("Failed to fetch GitHub stars:", error);
 	}
+	return cachedStars;
+}
+
+export async function Header() {
+	const stars = await getStarCount();
 
 	return (
 		<header className="flex items-center justify-between">
