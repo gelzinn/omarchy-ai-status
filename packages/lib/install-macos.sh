@@ -187,7 +187,11 @@ rm -f "$PLUGIN_DIR"/ai-status.*.py 2>/dev/null || true
 if [ "$MODE" = "stream" ]; then
     PLUGIN_FILE="$PLUGIN_DIR/ai-status.5s.py"
     SUBCOMMAND="swiftbar-stream"
-    TYPE_META="# <swiftbar.type>streamable</swiftbar.type>"
+    TYPE_META="$(cat <<'EOF'
+# <swiftbar.type>streamable</swiftbar.type>
+# <swiftbar.useTrailingStreamSeparator>true</swiftbar.useTrailingStreamSeparator>
+EOF
+)"
 else
     PLUGIN_FILE="$PLUGIN_DIR/ai-status.30s.py"
     SUBCOMMAND="swiftbar"
